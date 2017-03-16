@@ -15,38 +15,39 @@ dispatches events as they happen.
 type Bot struct {
 	API      *slack.Client
 	RTM      *slack.RTM
-	Handlers map[string][]Handler
+	Handlers map[string][]EventHandler
 }
 
 /*
-Creates a new bot instance by connecting to Slack. This doesn't do any plugin
-loading or initialization.
+Creates a new bot instance. This only initializes the API instance. The RTM
+connection will not happen until you call RunForever() on the bot.
 */
 func newBot(key string) *Bot {
 	API := slack.New(key)
 	API.SetDebug(true)
-	return &Bot{API: API, RTM: nil, Handlers: make(map[string][]Handler)}
+	return &Bot{API: API, RTM: nil, Handlers: make(map[string][]EventHandler)}
 }
 
 /*
-Register a Handler.
+Register an EventHandler.
 */
-func (bot *Bot) Register(tp string, handler Handler) {
-	var handlerList []Handler
-	var ok bool
-	handlerList, ok = bot.Handlers[tp]
-	if !ok {
-		handlerList = make([]Handler, 0, 5)
-	}
-	handlerList = append(handlerList, handler)
-	bot.Handlers[tp] = handlerList
+func (bot *Bot) OnEvent(tp string, eh EventHandler) {
+	bot.Handlers[tp] = append(bot.Handlers[tp], eh)
 }
 
 /*
-Register a callback handler.
+Register a MessageHandler. This is still an EventHandler under the hood, but
+this definitely makes client code a little prettier.
 */
-func (bot *Bot) RegisterF(tp string, plugin *Plugin, cb HandlerCallback) {
-	bot.Register(tp, NewHandlerFunc(plugin, cb))
+func (bot *Bot) OnMessage(subType string, mh MessageHandler) {
+	bot.OnEvent("message", func(bot *Bot, evt slack.RTMEvent) error {
+		msgEvent := evt.Data.(*slack.MessageEvent)
+		if msgEvent.Msg.SubType == subType {
+			return mh(bot, msgEvent)
+		} else {
+			return nil
+		}
+	})
 }
 
 /*
@@ -56,25 +57,26 @@ func (bot *Bot) RunForever() {
 	bot.RTM = bot.API.NewRTM()
 	go bot.RTM.ManageConnection()
 
-	fmt.Printf("Handlers\n")
-	fmt.Printf("%+v\n", bot.Handlers)
 	for evt := range bot.RTM.IncomingEvents {
-		handlers, ok := bot.Handlers[evt.Type]
-		if !ok {
-			continue
-		}
-		fmt.Printf("handlers for event\n")
-		fmt.Printf("%+v\n", handlers)
+		fmt.Printf("Don't worry, I'll handle it.\n")
+		handlers := bot.Handlers[evt.Type]
 		for _, handler := range handlers {
-			handler.Handle(bot, evt)
+			fmt.Printf("No seriously, I got this!.\n")
+			handler(bot, evt)
 		}
+		fmt.Printf("See?\n")
 	}
 }
 
+/*
+
+ */
 func Run() {
 	bot := newBot(os.Args[1])
-	bot.RegisterF("message", nil, func(bot *Bot, evt slack.RTMEvent, data interface{}) {
-		fmt.Println(evt)
+	bot.OnMessage("", func(bot *Bot, msgEvent *slack.MessageEvent) error {
+		fmt.Printf("[%s]%s: %s\n", msgEvent.Msg.Channel, msgEvent.Msg.User,
+			msgEvent.Msg.Text)
+		return nil
 	})
 	bot.RunForever()
 }
