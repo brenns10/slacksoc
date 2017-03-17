@@ -25,6 +25,8 @@ follows:
 
     slacksoc config.yaml API_KEY
 
+### Third Party Plugins
+
 If you would like to implement your own plugins, or use a third-party plugin (if
 they ever exist), you will need to write a small amount of boilerplate code.
 This is because Go has no support for dynamic module loading, and therefore
