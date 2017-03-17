@@ -1,6 +1,6 @@
 /*
-This package is the core of the slacksoc bot library. It defines the main
-architecture of the Bot, event handling, plugin, and configuration interface.
+Slacksoc is a Slack bot creation framework. This package, lib, is the core of
+the framework. This documentation is the main reference for plugin developers.
 */
 package lib
 
