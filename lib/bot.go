@@ -1,10 +1,9 @@
 /*
-The lib package of slacksoc contains all the core machinery for making a bot
-with several plugins work well.
+This package is the core of the slacksoc bot library. It defines the main
+architecture of the Bot, event handling, plugin, and configuration interface.
 */
 package lib
 
-import "fmt"
 import "os"
 import "github.com/nlopes/slack"
 
@@ -15,7 +14,7 @@ dispatches events as they happen.
 type Bot struct {
 	API      *slack.Client
 	RTM      *slack.RTM
-	Handlers map[string][]EventHandler
+	handlers map[string][]EventHandler
 }
 
 /*
@@ -25,19 +24,23 @@ connection will not happen until you call RunForever() on the bot.
 func newBot(key string) *Bot {
 	API := slack.New(key)
 	API.SetDebug(true)
-	return &Bot{API: API, RTM: nil, Handlers: make(map[string][]EventHandler)}
+	return &Bot{API: API, RTM: nil, handlers: make(map[string][]EventHandler)}
 }
 
 /*
-Register an EventHandler.
+Register an EventHandler to be called whenever a specific type of event occurs.
+You can register the same EventHandler to multiple events with separate calls
+to this function.
 */
 func (bot *Bot) OnEvent(tp string, eh EventHandler) {
-	bot.Handlers[tp] = append(bot.Handlers[tp], eh)
+	bot.handlers[tp] = append(bot.handlers[tp], eh)
 }
 
 /*
-Register a MessageHandler. This is still an EventHandler under the hood, but
-this definitely makes client code a little prettier.
+Register a MessageHandler to be called whenever a specific subtype of the
+"message" event occurs: https://api.slack.com/events/message
+
+Use an empty subType ("") for normal messages (i.e., none of those subtypes).
 */
 func (bot *Bot) OnMessage(subType string, mh MessageHandler) {
 	bot.OnEvent("message", func(bot *Bot, evt slack.RTMEvent) error {
@@ -51,31 +54,28 @@ func (bot *Bot) OnMessage(subType string, mh MessageHandler) {
 }
 
 /*
-Run the bot forever
+This actually connects the bot to Slack and begins running it "forever".
 */
 func (bot *Bot) RunForever() {
 	bot.RTM = bot.API.NewRTM()
 	go bot.RTM.ManageConnection()
 
 	for evt := range bot.RTM.IncomingEvents {
-		fmt.Printf("Don't worry, I'll handle it.\n")
-		handlers := bot.Handlers[evt.Type]
+		handlers := bot.handlers[evt.Type]
 		for _, handler := range handlers {
-			fmt.Printf("No seriously, I got this!.\n")
 			handler(bot, evt)
 		}
-		fmt.Printf("See?\n")
 	}
 }
 
 /*
-
- */
+Create a bot object using command line arguments. Typically, all and end-user
+application should need to do is call third-party plugin registration functions,
+and then call this Run() function.
+*/
 func Run() {
 	bot := newBot(os.Args[1])
 	bot.OnMessage("", func(bot *Bot, msgEvent *slack.MessageEvent) error {
-		fmt.Printf("[%s]%s: %s\n", msgEvent.Msg.Channel, msgEvent.Msg.User,
-			msgEvent.Msg.Text)
 		return nil
 	})
 	bot.RunForever()

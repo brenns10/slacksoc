@@ -3,11 +3,28 @@ package lib
 import "github.com/nlopes/slack"
 
 /*
-Represents a function that is called on an event.
+EventHandler is a function type which handles an single Slack event from the
+RTM API. Although a complete description of the Slack API is out of scope, you
+can find information about the RTM API and the different types of events which
+are sent in their documentation: https://api.slack.com/rtm
+
+The EventHandler receives a pointer to the bot, as well as a copy of the slack
+library's RTMEvent. This structure contains a Data pointer, which may point to
+one of many types of structs in the library (those ending in -Event). A typical
+first step is to use a type assertion to retrieve the actual event data from
+this RTMEvent object. For documentation on the Go slack library types, see:
+https://godoc.org/github.com/nlopes/slack
+
+Finally, an important thing to note is that EventHandlers, like any function in
+Go, may be methods with receivers, or functions that have closures. So, a plugin
+could register one of its own methods as an event handler, and thus it would
+always be called with the correct pointer to its plugin data.
 */
 type EventHandler func(bot *Bot, evt slack.RTMEvent) error
 
 /*
-This is a happy simplification for message events.
+MessageHandler is a specialization of EventHandler. This takes care of some
+boilerplate code for the common case, that you are implementing a handler for
+the Slack "message" event type: https://api.slack.com/events/message
 */
 type MessageHandler func(bot *Bot, msg *slack.MessageEvent) error
