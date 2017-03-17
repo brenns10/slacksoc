@@ -1,5 +1,5 @@
 /*
-Slacksoc is a Slack bot creation framework. This package, lib, is the core of
+Slacksoc is a Slack bot creation framework. This package, lib, is th= ue core of
 the framework. This documentation is the main reference for plugin developers.
 */
 package lib
@@ -17,25 +17,25 @@ Bot contains all plugins and handlers. It manages the Slack API connection and
 dispatches events as they happen.
 */
 type Bot struct {
-	API      *slack.Client  // should not need sync
-	RTM      *slack.RTM     // does not need sync
-	Log      *logrus.Logger // no need to sync
-	Info     *slack.Info    // DO NOT ACCESS WITHOUT LOCKING
-	InfoLock sync.RWMutex   // this is the lock for ^
+	// These are public attributes, and can be accessed with no lock.
+	API  *slack.Client      // probably thread safe
+	RTM  *slack.RTM         // definitely thread safe
+	Log  *logrus.Logger     // definitely thread safe
+	User *slack.UserDetails // read only
+	Team *slack.Team        // read only
 
-	// yeah plugins can't touch this
+	// These private attributes require read/write locking to access safely.
+	// They have helper methods so that calling code need not worry about it.
+	infoLock      sync.RWMutex
+	userByName    map[string]*slack.User
+	userByID      map[string]*slack.User
+	channelByName map[string]string
+	channelByID   map[string]string
+
+	// These private attributes should just never be accessed outside of the
+	// main bot thread. They have no helper methods.
 	handlers map[string][]EventHandler
 	plugins  map[string]Plugin
-}
-
-/*
-This handler waits for the hello message and then loads the info.
-*/
-func (bot *Bot) helloHandler(_ *Bot, _ slack.RTMEvent) error {
-	bot.InfoLock.Lock()
-	bot.Info = bot.RTM.GetInfo()
-	bot.InfoLock.Unlock()
-	return nil
 }
 
 /*
@@ -49,13 +49,17 @@ func newBot(key string) *Bot {
 	Log.Level = logrus.DebugLevel
 	slack.SetLogger(log.New(Log.WriterLevel(logrus.DebugLevel), "", 0))
 	bot := &Bot{
-		API:      API,
-		RTM:      nil,
-		Log:      Log,
-		handlers: make(map[string][]EventHandler),
-		plugins:  make(map[string]Plugin),
+		API:           API,
+		RTM:           nil,
+		Log:           Log,
+		userByName:    make(map[string]*slack.User),
+		userByID:      make(map[string]*slack.User),
+		channelByName: make(map[string]string),
+		channelByID:   make(map[string]string),
+		plugins:       make(map[string]Plugin),
+		handlers:      make(map[string][]EventHandler),
 	}
-	bot.OnEvent("hello", bot.helloHandler)
+	bot.registerInfoHandlers()
 	return bot
 }
 
