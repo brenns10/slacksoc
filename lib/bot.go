@@ -26,7 +26,12 @@ connection will not happen until you call RunForever() on the bot.
 func newBot(key string) *Bot {
 	API := slack.New(key)
 	API.SetDebug(true)
-	return &Bot{API: API, RTM: nil, handlers: make(map[string][]EventHandler)}
+	return &Bot{
+		API:      API,
+		RTM:      nil,
+		handlers: make(map[string][]EventHandler),
+		plugins:  make(map[string]Plugin),
+	}
 }
 
 /*

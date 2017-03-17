@@ -30,7 +30,7 @@ type PluginConstructor func(bot *Bot, name string, config PluginConfig) Plugin
 /*
 Internal registry of plugin constructors.
 */
-var plugins map[string]PluginConstructor
+var plugins = make(map[string]PluginConstructor)
 
 /*
 This function will register a plugin constructor with the slacksoc library. Your
