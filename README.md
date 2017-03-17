@@ -25,7 +25,7 @@ follows:
 
     slacksoc config.yaml API_KEY
 
-### Third Party Plugins
+### Using External Plugins
 
 If you would like to implement your own plugins, or use a third-party plugin (if
 they ever exist), you will need to write a small amount of boilerplate code.
@@ -47,6 +47,31 @@ func main() {
     lib.Run()
 }
 ```
+
+### Developing Plugins
+
+Plugin development is rather simple. First, create a struct that implements the
+`Plugin` interface. It can store any state your plugin needs. Next, implement a
+constructor for your struct, which fits the signature of a `PluginConstructor`.
+Your constructor will create the plugin object, and then register any event
+handlers you'd like with the bot. Finally, register your plugin with
+`Register()`.
+
+Some tips:
+- The entire Slack API is available to you through `bot.API`, which is an
+  instance
+  of [`slack.Client`](https://godoc.org/github.com/nlopes/slack#Client). You
+  have an RTM connection available through `bot.RTM`, which is the easiest way
+  to send a message.
+- Your constructor receives the argument `config map[string]interface{}`. The
+  simplest way to use this is to
+  use [`mapstructure`](https://github.com/mitchellh/mapstructure) to Unmarshal
+  the data directly into your plugin struct.
+- If you are creating many plugins, turn them into a package and group all of
+  their registration into a single function for convenience.
+  
+See [plugins/respond.go](plugins/respond.go) for a simple example of a plugin
+with state, configuration, and an event handler.
 
 For more information,
 see
