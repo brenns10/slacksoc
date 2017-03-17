@@ -1,0 +1,8 @@
+plugins:
+  - name: Respond
+    config:
+      responses:
+        - trigger: "hi, slacksoc"
+          replies: ["hello", "wassup", "yo"]
+        - trigger: "bye, slacksoc"
+          replies: ["goodbye"]
