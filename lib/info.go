@@ -21,9 +21,10 @@ func (bot *Bot) helloHandler(_ *Bot, _ slack.RTMEvent) error {
 	bot.Log.Info("handling hello event")
 	bot.infoLock.Lock()
 	info := bot.RTM.GetInfo()
-	for _, user := range info.Users {
-		bot.userByName[user.Name] = &user
-		bot.userByID[user.ID] = &user
+	for i, user := range info.Users {
+		// use &info.Users[i] because &user is a pointer to a local variable!
+		bot.userByName[user.Name] = &info.Users[i]
+		bot.userByID[user.ID] = &info.Users[i]
 	}
 
 	for _, channel := range info.Channels {

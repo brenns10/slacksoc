@@ -6,3 +6,4 @@ plugins:
           replies: ["hello", "wassup", "yo"]
         - trigger: "bye, slacksoc"
           replies: ["goodbye"]
+  - name: Debug
