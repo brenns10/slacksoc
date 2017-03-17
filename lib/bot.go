@@ -5,8 +5,11 @@ the framework. This documentation is the main reference for plugin developers.
 package lib
 
 import "fmt"
+import "log"
 import "os"
+
 import "github.com/nlopes/slack"
+import "github.com/sirupsen/logrus"
 
 /*
 Bot contains all plugins and handlers. It manages the Slack API connection and
@@ -15,6 +18,7 @@ dispatches events as they happen.
 type Bot struct {
 	API      *slack.Client
 	RTM      *slack.RTM
+	Log      *logrus.Logger
 	handlers map[string][]EventHandler
 	plugins  map[string]Plugin
 }
@@ -26,9 +30,12 @@ connection will not happen until you call RunForever() on the bot.
 func newBot(key string) *Bot {
 	API := slack.New(key)
 	API.SetDebug(true)
+	Log := logrus.New()
+	slack.SetLogger(log.New(Log.WriterLevel(logrus.DebugLevel), "", 0))
 	return &Bot{
 		API:      API,
 		RTM:      nil,
+		Log:      Log,
 		handlers: make(map[string][]EventHandler),
 		plugins:  make(map[string]Plugin),
 	}
@@ -70,6 +77,9 @@ func (bot *Bot) RunForever() {
 	for evt := range bot.RTM.IncomingEvents {
 		handlers := bot.handlers[evt.Type]
 		for _, handler := range handlers {
+			bot.Log.WithFields(logrus.Fields{
+				"type": evt.Type,
+			}).Info("Handling a message.")
 			handler(bot, evt)
 		}
 	}

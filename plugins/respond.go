@@ -4,6 +4,7 @@ import "math/rand"
 import "github.com/brenns10/slacksoc/lib"
 import "github.com/mitchellh/mapstructure"
 import "github.com/nlopes/slack"
+import "github.com/sirupsen/logrus"
 
 /*
 An entry to associate a trigger with multiple potential replies.
@@ -53,6 +54,9 @@ func (r *respond) Respond(bot *lib.Bot, event *slack.MessageEvent) error {
 		replyIndex := rand.Intn(len(resp.Replies))
 		bot.RTM.SendMessage(bot.RTM.NewOutgoingMessage(resp.Replies[replyIndex],
 			event.Msg.Channel))
+		bot.Log.WithFields(logrus.Fields{
+			"trigger": resp.Trigger, "reply": resp.Replies[replyIndex],
+		}).Info("Respond trigger activated.")
 		return nil
 	}
 	return nil
