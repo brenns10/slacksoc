@@ -4,6 +4,7 @@ architecture of the Bot, event handling, plugin, and configuration interface.
 */
 package lib
 
+import "fmt"
 import "os"
 import "github.com/nlopes/slack"
 
@@ -15,6 +16,7 @@ type Bot struct {
 	API      *slack.Client
 	RTM      *slack.RTM
 	handlers map[string][]EventHandler
+	plugins  map[string]Plugin
 }
 
 /*
@@ -74,9 +76,11 @@ application should need to do is call third-party plugin registration functions,
 and then call this Run() function.
 */
 func Run() {
-	bot := newBot(os.Args[1])
-	bot.OnMessage("", func(bot *Bot, msgEvent *slack.MessageEvent) error {
-		return nil
-	})
+	bot := newBot(os.Args[2])
+	err := bot.configure(os.Args[1])
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
 	bot.RunForever()
 }
