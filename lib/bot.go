@@ -7,6 +7,7 @@ package lib
 import "fmt"
 import "log"
 import "os"
+import "sync"
 
 import "github.com/nlopes/slack"
 import "github.com/sirupsen/logrus"
@@ -16,11 +17,25 @@ Bot contains all plugins and handlers. It manages the Slack API connection and
 dispatches events as they happen.
 */
 type Bot struct {
-	API      *slack.Client
-	RTM      *slack.RTM
-	Log      *logrus.Logger
+	API      *slack.Client  // should not need sync
+	RTM      *slack.RTM     // does not need sync
+	Log      *logrus.Logger // no need to sync
+	Info     *slack.Info    // DO NOT ACCESS WITHOUT LOCKING
+	InfoLock sync.RWMutex   // this is the lock for ^
+
+	// yeah plugins can't touch this
 	handlers map[string][]EventHandler
 	plugins  map[string]Plugin
+}
+
+/*
+This handler waits for the hello message and then loads the info.
+*/
+func (bot *Bot) helloHandler(_ *Bot, _ slack.RTMEvent) error {
+	bot.InfoLock.Lock()
+	bot.Info = bot.RTM.GetInfo()
+	bot.InfoLock.Unlock()
+	return nil
 }
 
 /*
@@ -31,14 +46,17 @@ func newBot(key string) *Bot {
 	API := slack.New(key)
 	API.SetDebug(true)
 	Log := logrus.New()
+	Log.Level = logrus.DebugLevel
 	slack.SetLogger(log.New(Log.WriterLevel(logrus.DebugLevel), "", 0))
-	return &Bot{
+	bot := &Bot{
 		API:      API,
 		RTM:      nil,
 		Log:      Log,
 		handlers: make(map[string][]EventHandler),
 		plugins:  make(map[string]Plugin),
 	}
+	bot.OnEvent("hello", bot.helloHandler)
+	return bot
 }
 
 /*
