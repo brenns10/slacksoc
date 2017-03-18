@@ -145,9 +145,6 @@ Same as Bot.OnMatch, but takes a compiled regex.
 func (bot *Bot) OnMatchExpr(expr *regexp.Regexp, mh MessageHandler) {
 	bot.OnAddressed(func(bot *Bot, evt *slack.MessageEvent) error {
 		match := expr.FindAllStringIndex(evt.Msg.Text, 1)
-		bot.Log.Info(fmt.Sprintf("\"%s\"", evt.Msg.Text))
-		bot.Log.Info(expr.String())
-		bot.Log.Info(match)
 		if match != nil && match[0][0] == 0 && match[0][1] == len(evt.Msg.Text) {
 			return mh(bot, evt)
 		}
@@ -163,9 +160,6 @@ func (bot *Bot) OnCommand(cmd string, ch CommandHandler) {
 	bot.OnAddressed(func(bot *Bot, evt *slack.MessageEvent) error {
 		args, err := shlex.Split(evt.Msg.Text)
 		if err != nil {
-			bot.Log.WithFields(logrus.Fields{
-				"error": err,
-			}).Warn("error encountered in shlex")
 			return nil // bad command line syntax is not an error :)
 		}
 		if args[0] == cmd {
