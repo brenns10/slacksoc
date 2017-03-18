@@ -31,6 +31,9 @@ func (bot *Bot) helloHandler(_ *Bot, _ slack.RTMEvent) error {
 		bot.channelByName[channel.Name] = channel.ID
 		bot.channelByID[channel.ID] = channel.Name
 	}
+
+	bot.Team = info.Team
+	bot.User = info.User
 	bot.infoLock.Unlock()
 	return nil
 }
