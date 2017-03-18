@@ -52,8 +52,7 @@ func (r *respond) Respond(bot *lib.Bot, event *slack.MessageEvent) error {
 			continue
 		}
 		replyIndex := rand.Intn(len(resp.Replies))
-		bot.RTM.SendMessage(bot.RTM.NewOutgoingMessage(resp.Replies[replyIndex],
-			event.Msg.Channel))
+		bot.Reply(event, resp.Replies[replyIndex])
 		bot.Log.WithFields(logrus.Fields{
 			"trigger": resp.Trigger, "reply": resp.Replies[replyIndex],
 		}).Info("Respond trigger activated.")
