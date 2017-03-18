@@ -1,6 +1,7 @@
 package lib
 
 import "fmt"
+import "strings"
 
 import "github.com/nlopes/slack"
 
@@ -60,4 +61,24 @@ Construct a string to say a #channel, given the channel name.
 */
 func (bot *Bot) SayChannelN(name string) string {
 	return bot.SayChannelI(bot.GetChannelByName(name))
+}
+
+func IsDM(id string) bool {
+	return strings.HasPrefix(id, "D")
+}
+
+func IsUser(id string) bool {
+	return strings.HasPrefix(id, "U")
+}
+
+func IsChannel(id string) bool {
+	return strings.HasPrefix(id, "C")
+}
+
+func IsFile(id string) bool {
+	return strings.HasPrefix(id, "F")
+}
+
+func IsGroup(id string) bool {
+	return strings.HasPrefix(id, "G")
 }

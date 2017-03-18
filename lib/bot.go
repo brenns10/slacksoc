@@ -7,10 +7,12 @@ package lib
 import "fmt"
 import "log"
 import "os"
+import "regexp"
 import "sync"
 
 import "github.com/nlopes/slack"
 import "github.com/sirupsen/logrus"
+import "github.com/google/shlex"
 
 /*
 Bot contains all plugins and handlers. It manages the Slack API connection and
@@ -90,6 +92,89 @@ func (bot *Bot) OnMessage(subType string, mh MessageHandler) {
 }
 
 /*
+Register a MessageHandler to be called when a message comes in (subtype "") and
+it is addressed to the bot. The definition of "addressed" depends on the
+situation. In a channel or group, this is a message that begins with the bot
+username or an @mention of the bot, followed by an optional colon and whitespace.
+In a direct message, any message is considered "addressed" to the bot.
+
+Unlike a regular handler registered with OnMessage(), the event.Msg.Text field
+is modified so that it only includes the text "after" the part that "addresses"
+the message to the bot. So a message like "@slacksoc: hello there" would become
+"hello there" for a handler registered with OnAddressed()
+*/
+func (bot *Bot) OnAddressed(mh MessageHandler) {
+	bot.OnMessage("", func(bot *Bot, evt *slack.MessageEvent) error {
+		// We need to compile the regex *here* because when plugins register
+		// their handlers, the User/Team fields have not been initialized yet.
+		// Could optimize this by placing the compiled regex into a struct field
+		// which is initialized by the hello message handler.
+		re := regexp.MustCompile(fmt.Sprintf(
+			`\s*(<@%s(\|\w+)?>|@?%s):?\s+`, bot.User.ID, bot.User.Name,
+		))
+		match := re.FindAllStringIndex(evt.Msg.Text, 1)
+		if match != nil && match[0][0] == 0 {
+			// replace Msg.Text, but restore it after
+			oldText := evt.Msg.Text
+			evt.Msg.Text = evt.Msg.Text[match[0][1]:]
+			rv := mh(bot, evt)
+			evt.Msg.Text = oldText
+			return rv
+		}
+		if IsDM(evt.Msg.Channel) {
+			return mh(bot, evt)
+		}
+		return nil
+	})
+}
+
+/*
+Register a MessageHandler to be called whenever a message (subtype "") matches a
+regular expression. This is only run when the message matches, and the event
+which is passed to the handler is slightly modified, so that the message text
+does not include the portion of the message that is addressed to the bot.
+*/
+func (bot *Bot) OnMatch(regex string, mh MessageHandler) {
+	bot.OnMatchExpr(regexp.MustCompile(regex), mh)
+}
+
+/*
+Same as Bot.OnMatch, but takes a compiled regex.
+*/
+func (bot *Bot) OnMatchExpr(expr *regexp.Regexp, mh MessageHandler) {
+	bot.OnAddressed(func(bot *Bot, evt *slack.MessageEvent) error {
+		match := expr.FindAllStringIndex(evt.Msg.Text, 1)
+		bot.Log.Info(fmt.Sprintf("\"%s\"", evt.Msg.Text))
+		bot.Log.Info(expr.String())
+		bot.Log.Info(match)
+		if match != nil && match[0][0] == 0 && match[0][1] == len(evt.Msg.Text) {
+			return mh(bot, evt)
+		}
+		return nil
+	})
+}
+
+/*
+Register a CommandHandler to be called when a message addressed to the bot is a
+particular command.
+*/
+func (bot *Bot) OnCommand(cmd string, ch CommandHandler) {
+	bot.OnAddressed(func(bot *Bot, evt *slack.MessageEvent) error {
+		args, err := shlex.Split(evt.Msg.Text)
+		if err != nil {
+			bot.Log.WithFields(logrus.Fields{
+				"error": err,
+			}).Warn("error encountered in shlex")
+			return nil // bad command line syntax is not an error :)
+		}
+		if args[0] == cmd {
+			return ch(bot, evt, args)
+		}
+		return nil
+	})
+}
+
+/*
 This actually connects the bot to Slack and begins running it "forever".
 */
 func (bot *Bot) RunForever() {
@@ -98,10 +183,10 @@ func (bot *Bot) RunForever() {
 
 	for evt := range bot.RTM.IncomingEvents {
 		handlers := bot.handlers[evt.Type]
+		bot.Log.WithFields(logrus.Fields{
+			"type": evt.Type,
+		}).Info("Handling a message.")
 		for _, handler := range handlers {
-			bot.Log.WithFields(logrus.Fields{
-				"type": evt.Type,
-			}).Info("Handling a message.")
 			handler(bot, evt)
 		}
 	}

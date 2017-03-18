@@ -11,9 +11,6 @@ This is just for the plugin, we don't actually have any state.
 type debug struct{}
 
 func (d *debug) Users(bot *lib.Bot, event *slack.MessageEvent) error {
-	if event.Msg.Text != "users" {
-		return nil
-	}
 	users := bot.GetUsers()
 	for _, user := range users {
 		bot.Reply(event, fmt.Sprintf("user: id=%s, username=%s, email=%s",
@@ -23,9 +20,6 @@ func (d *debug) Users(bot *lib.Bot, event *slack.MessageEvent) error {
 }
 
 func (d *debug) Channels(bot *lib.Bot, event *slack.MessageEvent) error {
-	if event.Msg.Text != "channels" {
-		return nil
-	}
 	for _, channel := range bot.GetChannels() {
 		bot.Reply(event, fmt.Sprintf("channel: id=%s, name=%s", channel.ID,
 			channel.Name))
@@ -34,21 +28,10 @@ func (d *debug) Channels(bot *lib.Bot, event *slack.MessageEvent) error {
 }
 
 func (d *debug) Metadata(bot *lib.Bot, event *slack.MessageEvent) error {
-	if event.Msg.Text != "metadata" {
-		return nil
-	}
 	bot.Reply(event, fmt.Sprintf("team: id=%s, name=%s, domain=%s",
 		bot.Team.ID, bot.Team.Name, bot.Team.Domain))
 	bot.Reply(event, fmt.Sprintf("me: id=%s, name=%s", bot.User.ID,
 		bot.User.Name))
-	return nil
-}
-
-func (d *debug) Debug(bot *lib.Bot, event *slack.MessageEvent) error {
-	if event.Msg.Text != "debug" {
-		return nil
-	}
-	bot.React(event, "dope")
 	return nil
 }
 
@@ -80,10 +63,10 @@ Create a new debug plugin.
 */
 func newDebug(bot *lib.Bot, _ string, _ lib.PluginConfig) lib.Plugin {
 	d := &debug{}
-	bot.OnMessage("", d.Users)
-	bot.OnMessage("", d.Channels)
-	bot.OnMessage("", d.Metadata)
-	bot.OnMessage("", d.Debug)
-	bot.OnMessage("", d.Info)
+	bot.OnMatch("users", d.Users)
+	bot.OnMatch("channels", d.Channels)
+	bot.OnMatch("metadata", d.Metadata)
+	bot.OnMatch("debug", lib.React("dope"))
+	bot.OnMatch("info", d.Info)
 	return d
 }
