@@ -1,6 +1,7 @@
 package lib
 
 import "fmt"
+import "regexp"
 import "strings"
 
 import "github.com/nlopes/slack"
@@ -81,4 +82,21 @@ func IsFile(id string) bool {
 
 func IsGroup(id string) bool {
 	return strings.HasPrefix(id, "G")
+}
+
+/*
+Given string s, parse a user mention and return the user ID associated with it.
+This assumes that the user mention is the entire string. If there is no mention,
+returns an empty string.
+*/
+func ParseUserMention(s string) string {
+	expr := regexp.MustCompile(`<@(U\w+)(\|\w+)?>`)
+	match := expr.FindStringSubmatchIndex(s)
+	if match == nil {
+		return ""
+	}
+	if match[0] != 0 || match[1] != len(s) {
+		return ""
+	}
+	return s[match[2]:match[3]]
 }

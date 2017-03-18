@@ -18,4 +18,5 @@ To use the core plugins, simply call this function before calling lib.Run().
 func Register() {
 	lib.Register("Respond", newRespond)
 	lib.Register("Debug", newDebug)
+	lib.Register("Love", newLove)
 }
