@@ -65,7 +65,8 @@ func (d *debug) Help() string {
 		"*channels:* log a list of users\n" +
 		"*metadata:* log the team and user data\n" +
 		"*debug:* reacts to the message with :dope:\n" +
-		"*info:* tells you what channel you're in, etc"
+		"*info:* tells you what channel you're in, etc\n" +
+		"*id _target_*: return Slack ID of something"
 }
 
 /*
