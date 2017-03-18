@@ -52,6 +52,16 @@ func (d *debug) Debug(bot *lib.Bot, event *slack.MessageEvent) error {
 	return nil
 }
 
+func (d *debug) Info(bot *lib.Bot, event *slack.MessageEvent) error {
+	if event.Msg.Text != "info" {
+		return nil
+	}
+	bot.Reply(event, bot.MentionI(event.Msg.User)+": we are in "+
+		bot.SayChannelI(event.Msg.Channel)+", tell "+
+		bot.SpecialMention("everyone"))
+	return nil
+}
+
 func (d *debug) Describe() string {
 	return "several commands for seeing the internal state of the bot"
 }
@@ -61,7 +71,8 @@ func (d *debug) Help() string {
 		"  users - log a list of users\n" +
 		"  channels - log a list of users\n" +
 		"  metadata - log the team and user data\n" +
-		"  debug - reacts to the message with :dope:"
+		"  debug - reacts to the message with :dope:\n" +
+		"  info - tells you what channel you're in, etc"
 }
 
 /*
@@ -73,5 +84,6 @@ func newDebug(bot *lib.Bot, _ string, _ lib.PluginConfig) lib.Plugin {
 	bot.OnMessage("", d.Channels)
 	bot.OnMessage("", d.Metadata)
 	bot.OnMessage("", d.Debug)
+	bot.OnMessage("", d.Info)
 	return d
 }
