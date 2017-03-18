@@ -43,6 +43,10 @@ func (d *debug) Info(bot *lib.Bot, event *slack.MessageEvent) error {
 }
 
 func (d *debug) Id(bot *lib.Bot, evt *slack.MessageEvent, args []string) error {
+	if len(args) <= 1 {
+		bot.Reply(evt, "What do you want me to id?")
+		return nil
+	}
 	if args[1] == "me" {
 		bot.Reply(evt, evt.Msg.User)
 	} else {
