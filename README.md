@@ -19,7 +19,7 @@ install the `slacksoc` binary:
 
     go get github.com/brenns10/slacksoc/slacksoc
     
-Create a YAML configuration file - see [etc/sample.yaml](etc/sample.yaml) for an
+Create a YAML configuration file - see [sample.yaml](sample.yaml) for an
 example. Also, get a bot API token from your Slack. Then, you can run as
 follows:
 
