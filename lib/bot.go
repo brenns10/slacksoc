@@ -62,6 +62,7 @@ func newBot(key string) *Bot {
 		handlers:      make(map[string][]EventHandler),
 	}
 	bot.registerInfoHandlers()
+	bot.OnCommand("help", helpCommand)
 	return bot
 }
 

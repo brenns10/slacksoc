@@ -1,5 +1,10 @@
 package lib
 
+import "bytes"
+import "fmt"
+
+import "github.com/nlopes/slack"
+
 /*
 Plugin is an interface that all plugins must satisfy. The defined interface
 functions mostly center around giving help information to end users.
@@ -39,4 +44,33 @@ qualified Go import name.
 */
 func Register(name string, ctor PluginConstructor) {
 	plugins[name] = ctor
+}
+
+/*
+This handler is for showing help on all commands.
+*/
+func helpCommand(bot *Bot, evt *slack.MessageEvent, args []string) error {
+	var msg bytes.Buffer
+	if len(args) <= 1 {
+		msg.WriteString(fmt.Sprintf(
+			"I am %s. I have many plugins:\n\n", bot.User.Name,
+		))
+		for name, plugin := range bot.plugins {
+			msg.WriteString("*" + name + ":* ")
+			msg.WriteString(plugin.Describe())
+			msg.WriteString("\n")
+		}
+		msg.WriteString("\nUse `help PLUGIN` for more information on a plugin.")
+		bot.Reply(evt, msg.String())
+	} else {
+		plugin, ok := bot.plugins[args[1]]
+		if ok {
+			bot.Reply(evt, plugin.Help())
+		} else {
+			bot.Reply(evt, fmt.Sprintf(
+				"Sorry, I couldn't find the plugin \"%s\"", args[1],
+			))
+		}
+	}
+	return nil
 }

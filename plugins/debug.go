@@ -60,12 +60,12 @@ func (d *debug) Describe() string {
 }
 
 func (d *debug) Help() string {
-	return "The Debug plugin contains several plugins for debugging the bot.\n" +
-		"  users - log a list of users\n" +
-		"  channels - log a list of users\n" +
-		"  metadata - log the team and user data\n" +
-		"  debug - reacts to the message with :dope:\n" +
-		"  info - tells you what channel you're in, etc"
+	return "The Debug plugin contains several commands for debugging the bot.\n" +
+		"*users:* reply with list of users\n" +
+		"*channels:* log a list of users\n" +
+		"*metadata:* log the team and user data\n" +
+		"*debug:* reacts to the message with :dope:\n" +
+		"*info:* tells you what channel you're in, etc"
 }
 
 /*
