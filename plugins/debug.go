@@ -36,12 +36,18 @@ func (d *debug) Metadata(bot *lib.Bot, event *slack.MessageEvent) error {
 }
 
 func (d *debug) Info(bot *lib.Bot, event *slack.MessageEvent) error {
-	if event.Msg.Text != "info" {
-		return nil
-	}
 	bot.Reply(event, bot.MentionI(event.Msg.User)+": we are in "+
 		bot.SayChannelI(event.Msg.Channel)+", tell "+
 		bot.SpecialMention("everyone"))
+	return nil
+}
+
+func (d *debug) Id(bot *lib.Bot, evt *slack.MessageEvent, args []string) error {
+	if args[1] == "me" {
+		bot.Reply(evt, evt.Msg.User)
+	} else {
+		bot.Reply(evt, "Sorry, I only know how to 'id me'")
+	}
 	return nil
 }
 
@@ -68,5 +74,6 @@ func newDebug(bot *lib.Bot, _ string, _ lib.PluginConfig) lib.Plugin {
 	bot.OnMatch("metadata", d.Metadata)
 	bot.OnMatch("debug", lib.React("dope"))
 	bot.OnMatch("info", d.Info)
+	bot.OnCommand("id", d.Id)
 	return d
 }
