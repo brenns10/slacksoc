@@ -131,9 +131,7 @@ func (bot *Bot) OnAddressed(mh MessageHandler) {
 
 /*
 Register a MessageHandler to be called whenever a message (subtype "") matches a
-regular expression. This is only run when the message matches, and the event
-which is passed to the handler is slightly modified, so that the message text
-does not include the portion of the message that is addressed to the bot.
+regular expression.
 */
 func (bot *Bot) OnMatch(regex string, mh MessageHandler) {
 	bot.OnMatchExpr(regexp.MustCompile(regex), mh)
