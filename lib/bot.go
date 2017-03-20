@@ -5,7 +5,6 @@ the framework. This documentation is the main reference for plugin developers.
 package lib
 
 import "fmt"
-import "log"
 import "os"
 import "regexp"
 import "sync"
@@ -41,17 +40,17 @@ type Bot struct {
 }
 
 /*
-Creates a new bot instance. This only initializes the API instance. The RTM
-connection will not happen until you call RunForever() on the bot.
+Creates a new bot instance. This initializes the internal data structures, as
+well as the bot Logger. However, the API object is not initialized until the bot
+is configured. The RTM object is not initialized until the bot starts its "run
+forever" loop. The User and Team objects are not initialized until the bot
+receives the server's "hello" event.
 */
-func newBot(key string) *Bot {
-	API := slack.New(key)
-	API.SetDebug(true)
+func newBot() *Bot {
 	Log := logrus.New()
 	Log.Level = logrus.DebugLevel
-	slack.SetLogger(log.New(Log.WriterLevel(logrus.DebugLevel), "", 0))
 	bot := &Bot{
-		API:           API,
+		API:           nil,
 		RTM:           nil,
 		Log:           Log,
 		userByName:    make(map[string]*slack.User),
@@ -191,7 +190,11 @@ application should need to do is call third-party plugin registration functions,
 and then call this Run() function.
 */
 func Run() {
-	bot := newBot(os.Args[2])
+	if len(os.Args) < 2 {
+		fmt.Printf("usage: %s CONFIG\n", os.Args[0])
+		return
+	}
+	bot := newBot()
 	err := bot.configure(os.Args[1])
 	if err != nil {
 		fmt.Println(err)

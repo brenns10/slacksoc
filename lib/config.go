@@ -2,8 +2,11 @@ package lib
 
 import "fmt"
 import "io/ioutil"
+import "log"
 import "os"
 import "gopkg.in/yaml.v2"
+import "github.com/sirupsen/logrus"
+import "github.com/nlopes/slack"
 
 /*
 PluginConfig is the type that is used to configure plugins. It is a map which
@@ -17,13 +20,14 @@ The plugins section of the bot config file is just a list of these.
 */
 type pluginConfigEntry struct {
 	Name   string
-	Config PluginConfig `yaml:",omitempty"`
+	Config PluginConfig `yaml:",omitempty,inline"`
 }
 
 /*
 This structure represents the configuration file used to configure the bot.
 */
 type botConfig struct {
+	Token   string
 	Plugins []pluginConfigEntry
 	// more configuration information will likely go here
 }
@@ -48,6 +52,11 @@ func (b *Bot) configure(filename string) error {
 	if err != nil {
 		return err
 	}
+
+	API := slack.New(config.Token)
+	API.SetDebug(true)
+	slack.SetLogger(log.New(b.Log.WriterLevel(logrus.DebugLevel), "", 0))
+	b.API = API
 
 	for _, entry := range config.Plugins {
 		ctor, ok := plugins[entry.Name]

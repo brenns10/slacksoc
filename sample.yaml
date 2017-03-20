@@ -1,34 +1,32 @@
+token: foobar
 plugins:
   - name: Respond
-    config:
-      responses:
-        - trigger: "hi, slacksoc"
-          replies: ["hello", "wassup", "yo"]
-        - trigger: "bye, slacksoc"
-          replies: ["goodbye"]
+    responses:
+      - trigger: "hi, slacksoc"
+        replies: ["hello", "wassup", "yo"]
+      - trigger: "bye, slacksoc"
+        replies: ["goodbye"]
   - name: Debug
   - name: Love
-    config:
       # You'll need to get this from the Admin section of CWRU love.
-      apiKey: love
-      baseUrl: https://cwrulove.appspot.com/api
+    apiKey: love
+    baseUrl: https://cwrulove.appspot.com/api
   - name: GitHub
-    config:
-      # clientID and clientSecret should be created by registering an app
-      # https://github.com/settings/applications/new
-      clientID: blah
-      clientSecret: foo
-      # accessToken is the authorization for your application to act on behalf
-      # of a particular user. Log into this user on GitHub and go here:
-      #
-      # https://github.com/login/oauth/authorize?scope=repo&client_id=$CLIENT_ID
-      #
-      # Then, take the code appended to the URL and put it into this curl:
-      #
-      # curl -X POST -F 'client_id=$CLIENT_ID' \
-      #              -F 'client_secret=$CLIENT_SECRET' \
-      #              -F 'code=$CODE' \
-      #      https://github.com/login/oauth/access_token
-      #
-      # The accessToken will be in the response.
-      accessToken: bar
+    # clientID and clientSecret should be created by registering an app
+    # https://github.com/settings/applications/new
+    clientID: blah
+    clientSecret: foo
+    # accessToken is the authorization for your application to act on behalf
+    # of a particular user. Log into this user on GitHub and go here:
+    #
+    # https://github.com/login/oauth/authorize?scope=repo&client_id=$CLIENT_ID
+    #
+    # Then, take the code appended to the URL and put it into this curl:
+    #
+    # curl -X POST -F 'client_id=$CLIENT_ID' \
+    #              -F 'client_secret=$CLIENT_SECRET' \
+    #              -F 'code=$CODE' \
+    #      https://github.com/login/oauth/access_token
+    #
+    # The accessToken will be in the response.
+    accessToken: bar
