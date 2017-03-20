@@ -57,8 +57,6 @@ func (r *respond) Help() string {
 func (r *respond) Respond(bot *lib.Bot, event *slack.MessageEvent) error {
 	for _, resp := range r.Responses {
 		// must be a full match
-		m := resp.trigger.FindString(event.Msg.Text)
-		bot.Log.WithFields(logrus.Fields{"m": m}).Info("hi")
 		if resp.trigger.FindString(event.Msg.Text) != event.Msg.Text {
 			continue
 		}
