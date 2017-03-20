@@ -32,4 +32,5 @@ func Register() {
 	lib.Register("Respond", newRespond)
 	lib.Register("Debug", newDebug)
 	lib.Register("Love", newLove)
+	lib.Register("GitHub", newGitHub)
 }
