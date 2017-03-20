@@ -20,6 +20,12 @@ baseUrl, which be the URL of the "api" endpoint, but without the trailing slash.
 See golove/love package docs for details:
 https://godoc.org/github.com/hacsoc/golove/love. See also the Yelp love repo
 for even more details: https://github.com/Yelp/love
+
+GitHub is a plugin which allows you to post a GitHub issue. See "slacksoc help
+GitHub" for usage instructions. In its config object, you will need to set the
+fields clientID, clientSecret, and accessToken. See the sample configuration
+file for format and some basic insructions:
+https://github.com/brenns10/slacksoc/blob/master/sample.yaml
 */
 package plugins
 
