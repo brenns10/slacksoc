@@ -135,10 +135,16 @@ func (p *ghPlugin) Issue(bot *lib.Bot, evt *slack.MessageEvent, args []string) e
 			Milestone: nil,
 		}
 		issue, _, err := p.client.Issues.Create(context.TODO(), owner, repo, &request)
+		logEntry := bot.Log.WithFields(logrus.Fields{
+			"title": *title, "body": body, "assignee": *assignee, "owner": owner,
+			"repos": repo,
+		})
 		if err != nil {
 			bot.Reply(evt, "Error creating the issue: "+err.Error())
+			logEntry.Error("Error creating a GitHub issue.")
 		} else {
 			bot.Reply(evt, *issue.HTMLURL)
+			logEntry.Info("Created a GitHub issue.")
 		}
 	}()
 	return nil
