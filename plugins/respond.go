@@ -56,8 +56,7 @@ func (r *respond) Help() string {
 
 func (r *respond) Respond(bot *lib.Bot, event *slack.MessageEvent) error {
 	for _, resp := range r.Responses {
-		// must be a full match
-		if resp.trigger.FindString(event.Msg.Text) != event.Msg.Text {
+		if len(resp.trigger.FindStringIndex(event.Msg.Text)) > 0 {
 			continue
 		}
 		var reply, react string

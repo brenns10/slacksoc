@@ -1,16 +1,33 @@
 token: foobar
 plugins:
   - name: Respond
+    # This is a list of objects that define a response. (As of now) only one
+    # response can ever fire at a time--the first match.
+    #
+    # * trigger is a regular expression that uses the syntax of RE2:
+    #   https://golang.org/s/re2syntax
+    #   + For case insensitive matching, put (?i) at the front of your regex
+    #   + The regular expression need only match within the string, not
+    #     necessarily the whole string.
+    #   + Use ^ and $ to match beginning/end of the string
+    #   + If you have trouble with YAML messing up your regex, check this:
+    #     http://stackoverflow.com/questions/6915756/uninterpreted-strings-in-yaml
+    #
+    # * replies - A list. One is randomly selected and sent to the channel on
+    #   match.
+    #
+    # * reacts - A list. One is randomly selected and added to the message on
+    #   match. Don't include colons. This will happen in addition to the reply.
     responses:
-      - trigger: "(yo|hey|hi|hello|sup),? slacksoc"
+      - trigger: ^(yo|hey|hi|hello|sup),? slacksoc$
         replies: ["hello", "wassup", "yo"]
-      - trigger: "((good)?bye|adios),? slacksoc"
+      - trigger: ^((good)?bye|adios),? slacksoc$
         replies: ["goodbye"]
-      - trigger: ".*[iI] [lL]ove [yY]ou.*"
+      - trigger: (?i)i love you
         reacts: ["heart"]
   - name: Debug
   - name: Love
-      # You'll need to get this from the Admin section of CWRU love.
+    # You'll need to get this from the Admin section of CWRU love.
     apiKey: love
     baseUrl: https://cwrulove.appspot.com/api
   - name: GitHub
