@@ -141,8 +141,8 @@ Same as Bot.OnMatch, but takes a compiled regex.
 */
 func (bot *Bot) OnMatchExpr(expr *regexp.Regexp, mh MessageHandler) {
 	bot.OnAddressed(func(bot *Bot, evt *slack.MessageEvent) error {
-		match := expr.FindAllStringIndex(evt.Msg.Text, 1)
-		if match != nil && match[0][0] == 0 && match[0][1] == len(evt.Msg.Text) {
+		match := expr.FindStringIndex(evt.Msg.Text)
+		if len(match) > 0 {
 			return mh(bot, evt)
 		}
 		return nil
