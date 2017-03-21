@@ -130,23 +130,32 @@ func (bot *Bot) OnAddressed(mh MessageHandler) {
 
 /*
 Register a MessageHandler to be called whenever a message (subtype "") matches a
-regular expression.
+regular expression. The message need not be addressed to the bot.
 */
 func (bot *Bot) OnMatch(regex string, mh MessageHandler) {
-	bot.OnMatchExpr(regexp.MustCompile(regex), mh)
+	bot.OnMessage(IfMatch(regex, mh))
 }
 
 /*
 Same as Bot.OnMatch, but takes a compiled regex.
 */
 func (bot *Bot) OnMatchExpr(expr *regexp.Regexp, mh MessageHandler) {
-	bot.OnAddressed(func(bot *Bot, evt *slack.MessageEvent) error {
-		match := expr.FindStringIndex(evt.Msg.Text)
-		if len(match) > 0 {
-			return mh(bot, evt)
-		}
-		return nil
-	})
+	bot.OnMessage(IfMatchExpr(expr, mh))
+}
+
+/*
+Register a MessageHandler to be called whenever a message (subtype "") addressed
+to the bot matches a regular expression.
+*/
+func (bot *Bot) OnAddressedMatch(regex string, mh MessageHandler) {
+	bot.OnAddressed(IfMatch(regex, mh))
+}
+
+/*
+Same as Bot.OnMatch, but takes a compiled regex.
+*/
+func (bot *Bot) OnAddressedMatchExpr(expr *regexp.Regexp, mh MessageHandler) {
+	bot.OnAddressed(IfMatchExpr(expr, mh))
 }
 
 /*

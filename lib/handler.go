@@ -1,5 +1,7 @@
 package lib
 
+import "regexp"
+
 import "github.com/nlopes/slack"
 
 /*
@@ -61,4 +63,26 @@ func React(rxn string) MessageHandler {
 		bot.React(evt, rxn)
 		return nil
 	}
+}
+
+/*
+Same as IfMatch, but with a compiled expression.
+*/
+func IfMatchExpr(re *regexp.Regexp, mh MessageHandler) MessageHandler {
+	return func(bot *Bot, evt *slack.MessageEvent) error {
+		match := re.FindStringIndex(evt.Msg.Text)
+		if len(match) > 0 {
+			return mh(bot, evt)
+		} else {
+			return nil
+		}
+	}
+}
+
+/*
+Return a message handler which will call another handler if the handler matches
+a Regexp.
+*/
+func IfMatch(re string, mh MessageHandler) MessageHandler {
+	return IfMatchExpr(regexp.MustCompile(re), mh)
 }
