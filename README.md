@@ -1,4 +1,4 @@
-slacksoc
+slacksoc [![GoDoc](https://godoc.org/github.com/brenns10/slacksoc?status.svg)](https://godoc.org/github.com/brenns10/slacksoc)
 ========
 
 This is a new, and maybe improved Slack bot library for Go.
