@@ -133,14 +133,14 @@ Register a MessageHandler to be called whenever a message (subtype "") matches a
 regular expression. The message need not be addressed to the bot.
 */
 func (bot *Bot) OnMatch(regex string, mh MessageHandler) {
-	bot.OnMessage(IfMatch(regex, mh))
+	bot.OnMessage("", IfMatch(regex, mh))
 }
 
 /*
 Same as Bot.OnMatch, but takes a compiled regex.
 */
 func (bot *Bot) OnMatchExpr(expr *regexp.Regexp, mh MessageHandler) {
-	bot.OnMessage(IfMatchExpr(expr, mh))
+	bot.OnMessage("", IfMatchExpr(expr, mh))
 }
 
 /*
