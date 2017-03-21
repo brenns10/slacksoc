@@ -22,13 +22,28 @@ type Plugin interface {
 }
 
 /*
-PluginConstructor is a function which will return a new instance of a Plugin. It
-may perform a wide array of activities, including registering handlers loading
-data, starting goroutines, etc. The bot parameter points to the Bot containing
-the plugin. The name parameter contains the instance name of this plugin (there
-may be many instances of a plugin). The config parameter contains configuration
-data loaded from YAML. The recommended use of config is to parse it directly
-using: https://godoc.org/github.com/mitchellh/mapstructure
+PluginConstructor is a function which will return a new instance of a Plugin.
+The constructor must have been registered with the bot, and it will be called
+during bot startup, if the plugin is requested by the configuration.
+
+This function is called with a pointer to the bot, as well as the plugin's name
+(as registered) and configuration data. See PluginConfig docs for more
+information on that.
+
+A PluginConstructor may perform a wide array of activities. Typical activities
+are registering handlers and loading configuration. More complex plugins may
+wish to start goroutines here, connect to APIs etc. This function must complete
+before the bot starts up, so blocking could be a concern, but not nearly as much
+concern as in an event handler.
+
+A few things are off limits within the constructor. The bot is not yet connected
+to Slack at this stage. As a direct result, the RTM field of the bot may not be
+used. More importantly, the functions which get users and channels may not be
+used either. If you wish to use those, consider registering a handler for the
+"hello" event.
+
+The API field of the bot is initialized at this point, so constructors may use
+that freely.
 */
 type PluginConstructor func(bot *Bot, name string, config PluginConfig) Plugin
 

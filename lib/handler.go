@@ -39,14 +39,31 @@ type MessageHandler func(bot *Bot, msg *slack.MessageEvent) error
 /*
 CommandHandler is a further specialization of MessageHandler. It receives a
 list of arguments. These arguments have been parsed out of the message, and they
-do not include the part of the message that is addressed to the bot.
+do not include the part of the message that is addressed to the bot. The syntax
+for argument parsing is similar to Unix shell syntax, as provided by Google's
+shlex package.
 
-Register these with bot.OnCommand().
+Similar to how a Unix CLI program would be invoked, args[0] will be the base
+command (the one specified in OnCommand()). args[1] will contain the first
+argument, etc. As a concrete example, consider the following call to OnCommand()
+
+    OnCommand("echo", handler)
+
+If the message "@slacksoc: echo 'hi'" was received, then the following would be
+true inside the handler:
+
+    args[0] == "echo"
+    args[1] == "hi"
+    msg.Msg.Text == "echo 'hi'" // @mention removed
 */
 type CommandHandler func(bot *Bot, msg *slack.MessageEvent, args []string) error
 
 /*
 Return a message handler which unconditionally responds with the given message.
+For example, this would cause a bot to reply to questions about who it is:
+
+    bot.OnAddressedMatch(`who are you\??`, lib.Reply("I'm just a bot."))
+
 */
 func Reply(msg string) MessageHandler {
 	return func(bot *Bot, evt *slack.MessageEvent) error {
@@ -81,7 +98,9 @@ func IfMatchExpr(re *regexp.Regexp, mh MessageHandler) MessageHandler {
 
 /*
 Return a message handler which will call another handler if the handler matches
-a Regexp.
+a Regexp. This can be used to make existing handlers more selective without
+having to modify them. Internally, this is used to implement the Bot.OnMatch()
+family of functions.
 */
 func IfMatch(re string, mh MessageHandler) MessageHandler {
 	return IfMatchExpr(regexp.MustCompile(re), mh)

@@ -1,4 +1,17 @@
-token: foobar
+# This file documents a sample configuration for Slacksoc.
+#
+# To users: you'll need to fill in a lot of blanks in here. Anything you need to
+# fill in is left in UPPER CASE so you can see it. Usually there will be a
+# comment above it describing how to fill it out. You may also just want to
+# eliminate some of the plugin entries if you don't need them.
+#
+# To developers: core plugins are listed in this configuration file. Your
+# core plugin should have its configuration documented here. You should paste
+# this documentation into the plugins/plugin.go docstring and keep it up to
+# date.
+
+# Go into "Custom Integrations" and create a bot!
+token: SLACK TOKEN
 plugins:
   - name: Respond
     # This is a list of objects that define a response. (As of now) only one
@@ -28,13 +41,13 @@ plugins:
   - name: Debug
   - name: Love
     # You'll need to get this from the Admin section of CWRU love.
-    apiKey: love
+    apiKey: LOVE API KEY
     baseUrl: https://cwrulove.appspot.com/api
   - name: GitHub
     # clientID and clientSecret should be created by registering an app
     # https://github.com/settings/applications/new
-    clientID: blah
-    clientSecret: foo
+    clientID: GITHUB CLIENT ID
+    clientSecret: GITHUB CLIENT SECRET
     # accessToken is the authorization for your application to act on behalf
     # of a particular user. Log into this user on GitHub and go here:
     #
@@ -48,4 +61,4 @@ plugins:
     #      https://github.com/login/oauth/access_token
     #
     # The accessToken will be in the response.
-    accessToken: bar
+    accessToken: GITHUB ACCESS TOKEN

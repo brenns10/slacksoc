@@ -1,6 +1,8 @@
 /*
-Slacksoc is a Slack bot creation framework. This package, lib, is th= ue core of
-the framework. This documentation is the main reference for plugin developers.
+Slacksoc is a Slack bot creation framework. This package, lib, is the core of
+the framework. This documentation should serve as a good API reference. A guided
+introduction to the framework is available on the GitHub wiki:
+https://github.com/brenns10/slacksoc/wiki
 */
 package lib
 
@@ -14,8 +16,13 @@ import "github.com/sirupsen/logrus"
 import "github.com/google/shlex"
 
 /*
-Bot contains all plugins and handlers. It manages the Slack API connection and
-dispatches events as they happen.
+Bot is the publicly exported type that contains most of the Slacksoc framework.
+Most use of the Bot will occur within plugins, since they receive pointers to
+the bot in constructors and event handlers. Public attributes may be accessed
+without synchronization, but should not be modified.
+
+No public constructor exists for the Bot as of now. Users of the library should
+only need to call the library's Run function (see its docs for more info).
 */
 type Bot struct {
 	// These are public attributes, and can be accessed with no lock.
@@ -66,12 +73,25 @@ func newBot() *Bot {
 }
 
 /*
-Register an EventHandler to be called whenever a specific type of event occurs.
-You can register the same EventHandler to multiple events with separate calls
-to this function.
+Register an EventHandler to be called whenever a specific type of Slack RTM
+event occurs. You can register the same EventHandler to multiple events with
+separate calls to this function.
+
+This is the most basic event handler in the bot - all other types of handlers
+and their associated registration functions eventually call this. Here is the
+hierarchy of handlers and registration functions.
+
+    EventHandler, OnEvent()
+    -> MessageHandler, OnMessage()
+       -> MessageHandler, OnAddressed()
+          -> MessageHandler, OnAddressedMatch()
+          -> MessageHandler, OnAddressedMatchExpr()
+          -> CommandHandler, OnCommand()
+       -> MessageHandler, OnMatch()
+       -> MessageHandler, OnMatchExpr()
 */
-func (bot *Bot) OnEvent(tp string, eh EventHandler) {
-	bot.handlers[tp] = append(bot.handlers[tp], eh)
+func (bot *Bot) OnEvent(type_ string, eh EventHandler) {
+	bot.handlers[type_] = append(bot.handlers[type_], eh)
 }
 
 /*
@@ -99,7 +119,7 @@ username or an @mention of the bot, followed by an optional colon and whitespace
 In a direct message, any message is considered "addressed" to the bot.
 
 Unlike a regular handler registered with OnMessage(), the event.Msg.Text field
-is modified so that it only includes the text "after" the part that "addresses"
+is modified so that it only includes the text after the part that "addresses"
 the message to the bot. So a message like "@slacksoc: hello there" would become
 "hello there" for a handler registered with OnAddressed()
 */
@@ -152,7 +172,7 @@ func (bot *Bot) OnAddressedMatch(regex string, mh MessageHandler) {
 }
 
 /*
-Same as Bot.OnMatch, but takes a compiled regex.
+Same as Bot.OnAddressedMatch, but takes a compiled regex.
 */
 func (bot *Bot) OnAddressedMatchExpr(expr *regexp.Regexp, mh MessageHandler) {
 	bot.OnAddressed(IfMatchExpr(expr, mh))
@@ -160,7 +180,8 @@ func (bot *Bot) OnAddressedMatchExpr(expr *regexp.Regexp, mh MessageHandler) {
 
 /*
 Register a CommandHandler to be called when a message addressed to the bot is a
-particular command.
+particular command. The handler receives parsed arguments, assuming that the
+first argument is cmd. See the documentation for CommandHandler for more details.
 */
 func (bot *Bot) OnCommand(cmd string, ch CommandHandler) {
 	bot.OnAddressed(func(bot *Bot, evt *slack.MessageEvent) error {
@@ -176,9 +197,9 @@ func (bot *Bot) OnCommand(cmd string, ch CommandHandler) {
 }
 
 /*
-This actually connects the bot to Slack and begins running it "forever".
+This function starts the Slack RTM connection and runs the bot "forever".
 */
-func (bot *Bot) RunForever() {
+func (bot *Bot) runForever() {
 	bot.RTM = bot.API.NewRTM()
 	go bot.RTM.ManageConnection()
 
@@ -194,9 +215,31 @@ func (bot *Bot) RunForever() {
 }
 
 /*
-Create a bot object using command line arguments. Typically, all and end-user
-application should need to do is call third-party plugin registration functions,
-and then call this Run() function.
+Create and run a bot object using command line arguments. Currently, one command
+line argument is expected: the path of a YAML configuration file. The
+configuration file should at least contain the following:
+
+    token: SLACK API TOKEN
+    plugins:
+      - name: PluginName
+        # put any additional plugin configuration here
+      - name: NextPluginName
+
+Since Go does not allow dynamic loading, all Plugins must be registered before
+this function is invoked. If you use only the core plugins provided, the
+slacksoc binary is good enough. If you are creating your own bot, you will need
+to register your plugins (as well as the core plugins) before calling run. As
+an example:
+
+    package main
+    import "github.com/brenns10/slacksoc/lib"
+    import "github.com/brenns10/slacksoc/plugins"
+
+    func main() {
+        plugins.Register()
+        lib.Register("MyPlugin", newMyPlugin)
+        lib.Run()
+    }
 */
 func Run() {
 	if len(os.Args) < 2 {
@@ -209,5 +252,5 @@ func Run() {
 		fmt.Println(err)
 		return
 	}
-	bot.RunForever()
+	bot.runForever()
 }

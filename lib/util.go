@@ -7,14 +7,16 @@ import "strings"
 import "github.com/nlopes/slack"
 
 /*
-A helper method which will reply to a message event with a message.
+A helper method which will reply to a message event with a message. This doesn't
+block the main thread.
 */
 func (bot *Bot) Reply(evt *slack.MessageEvent, msg string) {
 	bot.RTM.SendMessage(bot.RTM.NewOutgoingMessage(msg, evt.Msg.Channel))
 }
 
 /*
-A helper method which will react to a message event with a reaction.
+A helper method which will react to a message event with a reaction. This
+doesn't block the main thread.
 */
 func (bot *Bot) React(evt *slack.MessageEvent, reaction string) {
 	bot.API.AddReaction(reaction, slack.ItemRef{
@@ -64,16 +66,18 @@ func (bot *Bot) SayChannelN(name string) string {
 	return bot.SayChannelI(bot.GetChannelByName(name))
 }
 
-func IsDM(id string) bool {
-	return strings.HasPrefix(id, "D")
-}
-
-func IsUser(id string) bool {
-	return strings.HasPrefix(id, "U")
-}
-
+/*
+The IsChannel function, similar to IsDM, IsFile, IsGroup, and IsUser, returns
+true if the given Slack ID corresponds to a Channel (DM, File, Group, User,
+respectively). This is as simple as checking the first character of the ID, but
+these functions are more convenient and more readable.
+*/
 func IsChannel(id string) bool {
 	return strings.HasPrefix(id, "C")
+}
+
+func IsDM(id string) bool {
+	return strings.HasPrefix(id, "D")
 }
 
 func IsFile(id string) bool {
@@ -82,6 +86,10 @@ func IsFile(id string) bool {
 
 func IsGroup(id string) bool {
 	return strings.HasPrefix(id, "G")
+}
+
+func IsUser(id string) bool {
+	return strings.HasPrefix(id, "U")
 }
 
 /*
