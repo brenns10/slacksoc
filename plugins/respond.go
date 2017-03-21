@@ -56,7 +56,7 @@ func (r *respond) Help() string {
 
 func (r *respond) Respond(bot *lib.Bot, event *slack.MessageEvent) error {
 	for _, resp := range r.Responses {
-		if len(resp.trigger.FindStringIndex(event.Msg.Text)) > 0 {
+		if len(resp.trigger.FindStringIndex(event.Msg.Text)) <= 0 {
 			continue
 		}
 		var reply, react string
@@ -69,7 +69,6 @@ func (r *respond) Respond(bot *lib.Bot, event *slack.MessageEvent) error {
 			reactIndex := rand.Intn(len(resp.Reacts))
 			react = resp.Reacts[reactIndex]
 			bot.React(event, react)
-
 		}
 		bot.Log.WithFields(logrus.Fields{
 			"trigger": resp.Trigger, "reply": reply, "react": react,
