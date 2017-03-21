@@ -19,9 +19,11 @@ A helper method which will react to a message event with a reaction. This
 doesn't block the main thread.
 */
 func (bot *Bot) React(evt *slack.MessageEvent, reaction string) {
-	bot.API.AddReaction(reaction, slack.ItemRef{
-		Channel: evt.Msg.Channel, Timestamp: evt.Msg.Timestamp,
-	})
+	go func() {
+		bot.API.AddReaction(reaction, slack.ItemRef{
+			Channel: evt.Msg.Channel, Timestamp: evt.Msg.Timestamp,
+		})
+	}()
 }
 
 /*
