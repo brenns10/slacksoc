@@ -1,5 +1,6 @@
 package lib
 
+import "encoding/gob"
 import "fmt"
 import "io/ioutil"
 import "github.com/mitchellh/mapstructure"
@@ -58,8 +59,10 @@ type pluginConfigEntry struct {
 This structure represents the configuration file used to configure the bot.
 */
 type botConfig struct {
-	Token   string
-	Plugins []pluginConfigEntry
+	Token     string
+	StateFile string
+	SaveDelay int
+	Plugins   []pluginConfigEntry
 	// more configuration information will likely go here
 }
 
@@ -70,6 +73,8 @@ and it is for configuring the whole bot and loading the plugins.
 */
 func (b *Bot) configure(filename string) error {
 	var config botConfig
+
+	// Unmarshal the bot config from YAML.
 	file, err := os.Open(filename)
 	if err != nil {
 		return err
@@ -81,6 +86,24 @@ func (b *Bot) configure(filename string) error {
 	}
 
 	err = yaml.Unmarshal(arr, &config)
+	if err != nil {
+		return err
+	}
+
+	// Get the bot state filename and unmarshal it.
+	if config.StateFile == "" {
+		config.StateFile = "state.gob"
+	}
+	b.stateDelay = config.SaveDelay
+	b.stateFile = config.StateFile
+
+	file, err = os.Open(config.StateFile)
+	if err != nil {
+		return err
+	}
+
+	dec := gob.NewDecoder(file)
+	err = dec.Decode(b.state)
 	if err != nil {
 		return err
 	}

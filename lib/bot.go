@@ -6,6 +6,7 @@ https://github.com/brenns10/slacksoc/wiki
 */
 package lib
 
+import "encoding/gob"
 import "fmt"
 import "os"
 import "regexp"
@@ -40,6 +41,13 @@ type Bot struct {
 	channelByName map[string]string
 	channelByID   map[string]string
 
+	// This stuff is for plugin state and saving.
+	state      map[string][]byte
+	stateDelay int
+	stateFile  string
+	stateDirty bool
+	stateChan  chan pluginStateEvent
+
 	// These private attributes should just never be accessed outside of the
 	// main bot thread. They have no helper methods.
 	handlers map[string][]EventHandler
@@ -64,6 +72,8 @@ func newBot() *Bot {
 		userByID:      make(map[string]*slack.User),
 		channelByName: make(map[string]string),
 		channelByID:   make(map[string]string),
+		state:         make(map[string][]byte),
+		stateChan:     make(chan pluginStateEvent, 100),
 		plugins:       make(map[string]Plugin),
 		handlers:      make(map[string][]EventHandler),
 	}
@@ -197,19 +207,57 @@ func (bot *Bot) OnCommand(cmd string, ch CommandHandler) {
 }
 
 /*
+This function saves state if necessary.
+*/
+func (bot *Bot) saveState() {
+	if !bot.stateDirty {
+		return
+	}
+
+	file, err := os.Create(bot.stateFile)
+	if err != nil {
+		bot.Log.WithFields(logrus.Fields{
+			"error":    err,
+			"filename": bot.stateFile,
+		}).Error("Error opening statefile for save. Continuing.")
+		return
+	}
+
+	enc := gob.NewEncoder(file)
+	enc.Encode(bot.state)
+	file.Close()
+	bot.stateDirty = false
+}
+
+/*
 This function starts the Slack RTM connection and runs the bot "forever".
 */
 func (bot *Bot) runForever() {
 	bot.RTM = bot.API.NewRTM()
 	go bot.RTM.ManageConnection()
 
-	for evt := range bot.RTM.IncomingEvents {
-		handlers := bot.handlers[evt.Type]
-		bot.Log.WithFields(logrus.Fields{
-			"type": evt.Type,
-		}).Info("Handling a message.")
-		for _, handler := range handlers {
-			handler(bot, evt)
+	for {
+		select {
+		case evt := <-bot.RTM.IncomingEvents:
+			handlers := bot.handlers[evt.Type]
+			bot.Log.WithFields(logrus.Fields{
+				"type": evt.Type,
+			}).Info("Handling a message.")
+			for _, handler := range handlers {
+				handler(bot, evt)
+			}
+			break
+		case state := <-bot.stateChan:
+			if state.Type == "save" {
+				bot.saveState()
+			} else if state.Type == "update" {
+				bot.state[state.Plugin] = state.State
+			} else {
+				bot.Log.WithFields(logrus.Fields{
+					"type": state.Type,
+				}).Warn("Unknown state event encountered.")
+			}
+			break
 		}
 	}
 }
