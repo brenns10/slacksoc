@@ -87,6 +87,18 @@ fields clientID, clientSecret, and accessToken.
     # The accessToken will be in the response.
     accessToken: GITHUB ACCESS TOKEN
 
+RealName Plugin
+
+RealName is a plugin that politely asks people to set their "Real Name" fields
+so that other team members know their name. It sends a direct message to the
+user when they join a particular channel with empty Real Name fields. Typically,
+you'll want to run this on the #general channel so that having real names set is
+a policy for the whole team. However, you could run it on another channel, and
+it will still work.
+
+  - name: RealName
+    channel: general
+
 Plugin Library Design
 
 This plugin library demonstrates what I believe to be the best way to publish
@@ -94,6 +106,7 @@ plugins. Make the type name and constructor private. Collect all your plugins
 into a single package, and then expose only a single public function to Register
 them. Finally, document each plugin at the package level, with configuration
 samples.
+
 */
 package plugins
 
@@ -107,4 +120,5 @@ func Register() {
 	lib.Register("Debug", newDebug)
 	lib.Register("Love", newLove)
 	lib.Register("GitHub", newGitHub)
+	lib.Register("RealName", newRealName)
 }

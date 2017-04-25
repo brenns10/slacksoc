@@ -62,3 +62,5 @@ plugins:
     #
     # The accessToken will be in the response.
     accessToken: GITHUB ACCESS TOKEN
+  - name: RealName
+    channel: general
