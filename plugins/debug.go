@@ -1,6 +1,7 @@
 package plugins
 
 import "fmt"
+import "strconv"
 
 import "github.com/brenns10/slacksoc/lib"
 import "github.com/nlopes/slack"
@@ -8,7 +9,10 @@ import "github.com/nlopes/slack"
 /*
 This is just for the plugin, we don't actually have any state.
 */
-type debug struct{}
+type debug struct {
+	name  string
+	State int64
+}
 
 func (d *debug) Users(bot *lib.Bot, event *slack.MessageEvent) error {
 	users := bot.GetUsers()
@@ -55,6 +59,22 @@ func (d *debug) Id(bot *lib.Bot, evt *slack.MessageEvent, args []string) error {
 	return nil
 }
 
+func (d *debug) StateCmd(bot *lib.Bot, evt *slack.MessageEvent, args []string) error {
+	if len(args) <= 1 {
+		bot.Reply(evt, fmt.Sprintf("state is %d", d.State))
+	} else {
+		n, err := strconv.ParseInt(args[1], 10, 64)
+		if err != nil {
+			bot.Reply(evt, "Couldn't parse that number.")
+		} else {
+			d.State = n
+			bot.UpdateState(d.name, d)
+			bot.Reply(evt, "State has been updated.")
+		}
+	}
+	return nil
+}
+
 func (d *debug) Describe() string {
 	return "several commands for seeing the internal state of the bot"
 }
@@ -72,13 +92,16 @@ func (d *debug) Help() string {
 /*
 Create a new debug plugin.
 */
-func newDebug(bot *lib.Bot, _ string, _ lib.PluginConfig) lib.Plugin {
+func newDebug(bot *lib.Bot, name string, _ lib.PluginConfig) lib.Plugin {
 	d := &debug{}
+	d.name = name
+	bot.GetState(name, d)
 	bot.OnMatch("^users$", d.Users)
 	bot.OnMatch("^channels$", d.Channels)
 	bot.OnMatch("^metadata$", d.Metadata)
 	bot.OnMatch("debug", lib.React("dope"))
 	bot.OnMatch("^info$", d.Info)
 	bot.OnCommand("id", d.Id)
+	bot.OnCommand("state", d.StateCmd)
 	return d
 }
