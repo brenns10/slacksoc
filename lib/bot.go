@@ -11,6 +11,7 @@ import "fmt"
 import "os"
 import "regexp"
 import "sync"
+import "time"
 
 import "github.com/nlopes/slack"
 import "github.com/sirupsen/logrus"
@@ -210,10 +211,6 @@ func (bot *Bot) OnCommand(cmd string, ch CommandHandler) {
 This function saves state if necessary.
 */
 func (bot *Bot) saveState() {
-	if !bot.stateDirty {
-		return
-	}
-
 	file, err := os.Create(bot.stateFile)
 	if err != nil {
 		bot.Log.WithFields(logrus.Fields{
@@ -249,9 +246,21 @@ func (bot *Bot) runForever() {
 			break
 		case state := <-bot.stateChan:
 			if state.Type == "save" {
+				bot.Log.Info("Saving state...")
 				bot.saveState()
 			} else if state.Type == "update" {
+				bot.Log.WithFields(logrus.Fields{
+					"plugin": state.Plugin,
+				}).Info("Received state update")
 				bot.state[state.Plugin] = state.State
+				if !bot.stateDirty {
+					// only queue a new save when the state /becomes/ dirty
+					go func() {
+						time.Sleep(time.Duration(bot.stateDelay) * time.Second)
+						bot.stateChan <- pluginStateEvent{Type: "save"}
+					}()
+				}
+				bot.stateDirty = true
 			} else {
 				bot.Log.WithFields(logrus.Fields{
 					"type": state.Type,

@@ -66,6 +66,20 @@ type botConfig struct {
 	// more configuration information will likely go here
 }
 
+func (b *Bot) initLoadState(filename string) error {
+	file, err := os.Open(filename)
+	if err != nil {
+		return nil // we will use empty state if it doesn't exist
+	}
+
+	dec := gob.NewDecoder(file)
+	err = dec.Decode(&b.state)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
 /*
 This loads a configuration file, sets any configuration values in the Bot, and
 then initializes all plugins. To clarify, this configure() function is private
@@ -96,14 +110,7 @@ func (b *Bot) configure(filename string) error {
 	}
 	b.stateDelay = config.SaveDelay
 	b.stateFile = config.StateFile
-
-	file, err = os.Open(config.StateFile)
-	if err != nil {
-		return err
-	}
-
-	dec := gob.NewDecoder(file)
-	err = dec.Decode(b.state)
+	err = b.initLoadState(config.StateFile)
 	if err != nil {
 		return err
 	}
