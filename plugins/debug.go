@@ -101,6 +101,11 @@ func (d *debug) StateCmd(bot *lib.Bot, evt *slack.MessageEvent, args []string) e
 	return nil
 }
 
+func (d *debug) PM(bot *lib.Bot, evt *slack.MessageEvent) error {
+	bot.DirectMessage(evt.User, "hi there!")
+	return nil
+}
+
 func (d *debug) Describe() string {
 	return "several commands for seeing the internal state of the bot"
 }
@@ -112,7 +117,8 @@ func (d *debug) Help() string {
 		"*slacksoc metadata:* log the team and user data\n" +
 		"*slacksoc info:* tells you what channel you're in, etc\n" +
 		"*slacksoc id _target_*: return Slack ID of something\n" +
-		"*slacksoc state _[number]_*: set or get a persisted state number"
+		"*slacksoc state _[number]_*: set or get a persisted state number\n" +
+		"*slacksoc pm me*: request a PM"
 }
 
 /*
@@ -129,5 +135,6 @@ func newDebug(bot *lib.Bot, name string, cfg lib.PluginConfig) lib.Plugin {
 	bot.OnAddressedMatch("^info$", d.trustedHandler(d.Info))
 	bot.OnCommand("id", d.Id)
 	bot.OnCommand("state", d.StateCmd)
+	bot.OnAddressedMatch("^pm me$", d.PM)
 	return d
 }
