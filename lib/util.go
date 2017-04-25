@@ -5,6 +5,7 @@ import "regexp"
 import "strings"
 
 import "github.com/nlopes/slack"
+import "github.com/sirupsen/logrus"
 
 /*
 A helper method which will reply to a message event with a message. This doesn't
@@ -12,6 +13,33 @@ block the main thread.
 */
 func (bot *Bot) Reply(evt *slack.MessageEvent, msg string) {
 	bot.RTM.SendMessage(bot.RTM.NewOutgoingMessage(msg, evt.Msg.Channel))
+}
+
+/*
+A helper method for sending to any channel. You can do this with the underlying
+slack library primitives, but this saves some typing and it could insulate
+plugins from API changes.
+*/
+func (bot *Bot) Send(channelID string, msg string) {
+	bot.RTM.SendMessage(bot.RTM.NewOutgoingMessage(msg, channelID))
+}
+
+/*
+A helper method for sending direct messages. This does not block the main
+thread, since it executes in a goroutine.
+*/
+func (bot *Bot) DirectMessage(uid string, msg string) {
+	go func() {
+		_, _, channel, err := bot.API.OpenIMChannel(uid)
+		if err != nil {
+			bot.Log.WithFields(logrus.Fields{
+				"uid": uid,
+				"msg": msg,
+				"error": err,
+			}).Error("Failed to send DM.")
+		}
+		bot.Send(channel, msg)
+	}()
 }
 
 /*
