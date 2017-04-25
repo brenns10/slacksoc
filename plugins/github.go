@@ -15,7 +15,6 @@ import (
 
 	"github.com/brenns10/slacksoc/lib"
 	"github.com/google/go-github/github"
-	"github.com/mitchellh/mapstructure"
 	"github.com/nlopes/slack"
 	"github.com/sirupsen/logrus"
 	"golang.org/x/oauth2"
@@ -35,12 +34,7 @@ type ghPlugin struct {
 
 func newGitHub(bot *lib.Bot, _ string, cfg lib.PluginConfig) lib.Plugin {
 	g := ghPlugin{}
-	err := mapstructure.Decode(cfg, &g)
-	if err != nil {
-		bot.Log.WithFields(logrus.Fields{
-			"error": err,
-		}).Fatal("Error creating GitHub client.")
-	}
+	bot.Configure(cfg, &g, []string{"ClientID", "ClientSecret", "AccessToken"})
 	g.client = g.createClient()
 	bot.OnCommand("issue", g.Issue)
 	return &g

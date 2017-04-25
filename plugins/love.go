@@ -6,7 +6,6 @@ import "strings"
 import "github.com/brenns10/slacksoc/lib"
 import "github.com/hacsoc/golove/love"
 import "github.com/nlopes/slack"
-import "github.com/mitchellh/mapstructure"
 import "github.com/sirupsen/logrus"
 
 type lov struct {
@@ -95,10 +94,7 @@ func (l *lov) Help() string {
 
 func newLove(bot *lib.Bot, _ string, cfg lib.PluginConfig) lib.Plugin {
 	d := &lov{}
-	err := mapstructure.Decode(cfg, &d.client)
-	if err != nil {
-		return nil
-	}
+	bot.Configure(cfg, &d.client, []string{"ApiKey", "BaseUrl"})
 	bot.OnCommand("love", d.Love)
 	return d
 }
