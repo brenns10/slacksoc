@@ -115,6 +115,10 @@ func (b *Bot) configure(filename string) error {
 		return err
 	}
 
+	if config.Token == "" {
+		config.Token = os.Getenv("SLACK_TOKEN")
+	}
+
 	API := slack.New(config.Token)
 	API.SetDebug(true)
 	slack.SetLogger(log.New(b.Log.WriterLevel(logrus.DebugLevel), "", 0))

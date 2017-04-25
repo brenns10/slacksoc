@@ -54,24 +54,30 @@ See golove/love package docs for details:
 https://godoc.org/github.com/hacsoc/golove/love. See also the Yelp love repo
 for even more details: https://github.com/Yelp/love
 
+The ApiKey may be provided through the LOVE_API_KEY environment variable
+instead.
+
 Sample configuration:
 
   - name: Love
-    # You'll need to get this from the Admin section of CWRU love.
-    apiKey: LOVE API KEY
+    # You'll need to get this from the Admin section of CWRU love. You can
+    # provide this token via the config file, or the LOVE_API_KEY environment
+    # variable.
+    apiKey: LOVE_API_KEY
     baseUrl: https://cwrulove.appspot.com/api
 
 GitHub Plugin
 
 GitHub is a plugin which allows you to post a GitHub issue. See "slacksoc help
 GitHub" for usage instructions. In its config object, you will need to set the
-fields clientID, clientSecret, and accessToken.
+fields clientID, clientSecret, and accessToken. Or, you can specify them via
+environment variables.
 
   - name: GitHub
     # clientID and clientSecret should be created by registering an app
     # https://github.com/settings/applications/new
-    clientID: GITHUB CLIENT ID
-    clientSecret: GITHUB CLIENT SECRET
+    clientID: GITHUB_CLIENT_ID
+    clientSecret: GITHUB_CLIENT_SECRET
     # accessToken is the authorization for your application to act on behalf
     # of a particular user. Log into this user on GitHub and go here:
     #
@@ -85,7 +91,9 @@ fields clientID, clientSecret, and accessToken.
     #      https://github.com/login/oauth/access_token
     #
     # The accessToken will be in the response.
-    accessToken: GITHUB ACCESS TOKEN
+    accessToken: GITHUB_ACCESS_TOKEN
+    # You may provide the above GitHub tokens via the correspondingly named
+    # environment variables instead (e.g. GITHUB_ACCESS_TOKEN)
 
 RealName Plugin
 
