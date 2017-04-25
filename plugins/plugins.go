@@ -3,15 +3,48 @@ This library contains a set of core plugins for the slacksoc bot. To register
 these plugins, simply use the provided Register() function. Below is a list of
 provided plugins (none of their implementations are publicly accessible).
 
+Respond Plugin
+
 Respond is a plugin which allows you to register triggers and one or more
-responses to those triggers. In functionality, it is pretty much identical to
-Slackbot. Its configuration is a list of "response" objects, each of which
-contains "trigger" (a string), and "replies" (a list of strings).
+responses to those triggers. In functionality, it is pretty much a superset of
+Slackbot, since it allows regular expressions and reactions. Here is its sample
+configuration:
+
+  - name: Respond
+    # This is a list of objects that define a response. (As of now) only one
+    # response can ever fire at a time--the first match.
+    #
+    # * trigger is a regular expression that uses the syntax of RE2:
+    #   https://golang.org/s/re2syntax
+    #   + For case insensitive matching, put (?i) at the front of your regex
+    #   + The regular expression need only match within the string, not
+    #     necessarily the whole string.
+    #   + Use ^ and $ to match beginning/end of the string
+    #   + If you have trouble with YAML messing up your regex, check this:
+    #     http://stackoverflow.com/questions/6915756/uninterpreted-strings-in-yaml
+    #
+    # * replies - A list. One is randomly selected and sent to the channel on
+    #   match.
+    #
+    # * reacts - A list. One is randomly selected and added to the message on
+    #   match. Don't include colons. This will happen in addition to the reply.
+    responses:
+      - trigger: ^(yo|hey|hi|hello|sup),? slacksoc$
+        replies: ["hello", "wassup", "yo"]
+      - trigger: ^((good)?bye|adios),? slacksoc$
+        replies: ["goodbye"]
+      - trigger: (?i)i love you
+        reacts: ["heart"]
+
+
+Debug Plugin
 
 Debug is a plugin which adds several "commands" for viewing internal state of
-the bot and testing some capabilities. It allows you to view the list of
-channels, users, and IDs. It also allows you to view the team metadata and test
-the capability to post reactions.
+the bot and testing some capabilities. No configuration is required (beyond the
+name of the plugin). Use `slacksoc help Debug` for more information on its
+"functionality".
+
+Love Plugin
 
 Love is a CWRU Love client. It allows users to send each other love through a
 simple command syntax. Its configuration object must contain two variables:
@@ -21,11 +54,46 @@ See golove/love package docs for details:
 https://godoc.org/github.com/hacsoc/golove/love. See also the Yelp love repo
 for even more details: https://github.com/Yelp/love
 
+Sample configuration:
+
+  - name: Love
+    # You'll need to get this from the Admin section of CWRU love.
+    apiKey: LOVE API KEY
+    baseUrl: https://cwrulove.appspot.com/api
+
+GitHub Plugin
+
 GitHub is a plugin which allows you to post a GitHub issue. See "slacksoc help
 GitHub" for usage instructions. In its config object, you will need to set the
-fields clientID, clientSecret, and accessToken. See the sample configuration
-file for format and some basic insructions:
-https://github.com/brenns10/slacksoc/blob/master/sample.yaml
+fields clientID, clientSecret, and accessToken.
+
+  - name: GitHub
+    # clientID and clientSecret should be created by registering an app
+    # https://github.com/settings/applications/new
+    clientID: GITHUB CLIENT ID
+    clientSecret: GITHUB CLIENT SECRET
+    # accessToken is the authorization for your application to act on behalf
+    # of a particular user. Log into this user on GitHub and go here:
+    #
+    # https://github.com/login/oauth/authorize?scope=repo&client_id=$CLIENT_ID
+    #
+    # Then, take the code appended to the URL and put it into this curl:
+    #
+    # curl -X POST -F 'client_id=$CLIENT_ID' \
+    #              -F 'client_secret=$CLIENT_SECRET' \
+    #              -F 'code=$CODE' \
+    #      https://github.com/login/oauth/access_token
+    #
+    # The accessToken will be in the response.
+    accessToken: GITHUB ACCESS TOKEN
+
+Plugin Library Design
+
+This plugin library demonstrates what I believe to be the best way to publish
+plugins. Make the type name and constructor private. Collect all your plugins
+into a single package, and then expose only a single public function to Register
+them. Finally, document each plugin at the package level, with configuration
+samples.
 */
 package plugins
 

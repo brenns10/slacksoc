@@ -1,6 +1,8 @@
 package plugins
 
 import "math/rand"
+import "regexp"
+
 import "github.com/brenns10/slacksoc/lib"
 import "github.com/mitchellh/mapstructure"
 import "github.com/nlopes/slack"
@@ -11,7 +13,9 @@ An entry to associate a trigger with multiple potential replies.
 */
 type response struct {
 	Trigger string
+	trigger *regexp.Regexp
 	Replies []string
+	Reacts  []string
 }
 
 /*
@@ -32,6 +36,10 @@ func newRespond(bot *lib.Bot, name string, config lib.PluginConfig) lib.Plugin {
 	if err != nil {
 		return nil
 	}
+	for i, resp := range respond.Responses {
+		respond.Responses[i].trigger = regexp.MustCompile(resp.Trigger)
+		respond.Responses[i].trigger.Longest() // leftmost longest match
+	}
 	bot.OnMessage("", respond.Respond)
 	return &respond
 }
@@ -48,13 +56,22 @@ func (r *respond) Help() string {
 
 func (r *respond) Respond(bot *lib.Bot, event *slack.MessageEvent) error {
 	for _, resp := range r.Responses {
-		if event.Msg.Text != resp.Trigger {
+		if len(resp.trigger.FindStringIndex(event.Msg.Text)) <= 0 {
 			continue
 		}
-		replyIndex := rand.Intn(len(resp.Replies))
-		bot.Reply(event, resp.Replies[replyIndex])
+		var reply, react string
+		if len(resp.Replies) > 0 {
+			replyIndex := rand.Intn(len(resp.Replies))
+			reply = resp.Replies[replyIndex]
+			bot.Reply(event, reply)
+		}
+		if len(resp.Reacts) > 0 {
+			reactIndex := rand.Intn(len(resp.Reacts))
+			react = resp.Reacts[reactIndex]
+			bot.React(event, react)
+		}
 		bot.Log.WithFields(logrus.Fields{
-			"trigger": resp.Trigger, "reply": resp.Replies[replyIndex],
+			"trigger": resp.Trigger, "reply": reply, "react": react,
 		}).Info("Respond trigger activated.")
 		return nil
 	}

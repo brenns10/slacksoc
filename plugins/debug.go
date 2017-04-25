@@ -74,11 +74,11 @@ Create a new debug plugin.
 */
 func newDebug(bot *lib.Bot, _ string, _ lib.PluginConfig) lib.Plugin {
 	d := &debug{}
-	bot.OnMatch("users", d.Users)
-	bot.OnMatch("channels", d.Channels)
-	bot.OnMatch("metadata", d.Metadata)
+	bot.OnMatch("^users$", d.Users)
+	bot.OnMatch("^channels$", d.Channels)
+	bot.OnMatch("^metadata$", d.Metadata)
 	bot.OnMatch("debug", lib.React("dope"))
-	bot.OnMatch("info", d.Info)
+	bot.OnMatch("^info$", d.Info)
 	bot.OnCommand("id", d.Id)
 	return d
 }
