@@ -2,7 +2,8 @@ package lib
 
 import "fmt"
 import "io/ioutil"
-import "mapstructure"
+import "github.com/sirupsen/logrus"
+import "github.com/mitchellh/mapstructure"
 import "os"
 import "gopkg.in/yaml.v2"
 
@@ -66,7 +67,7 @@ func (b *Bot) configure(filename string) error {
 }
 
 func contains(list []string, value string) bool {
-	for item := range list {
+	for _, item := range list {
 		if item == value {
 			return true
 		}
@@ -79,26 +80,33 @@ Loads a plugin configuration into destination struct. Raise an error if the
 configuration object did not contain a top-level key listed in "required". Also
 raise an error if the configuration object contained any keys which were not
 successfully loaded into the struct, since this is probably not intended.
+
+Any error causes a crash, so the caller does not need to handle any errors.
 */
-func Configure(config PluginConfig, dest interface{}, required []string) error {
+func (b *Bot) Configure(config PluginConfig, dest interface{}, required []string) {
 	var metadata mapstructure.Metadata
 	decoderConfig := &mapstructure.DecoderConfig{
-		ErrorUnused: True,
+		ErrorUnused: true,
 		Metadata:    &metadata,
-		Result:      destination,
+		Result:      dest,
 	}
 	decoder, err := mapstructure.NewDecoder(decoderConfig)
 	if err != nil {
-		return err
+		b.Log.WithFields(logrus.Fields{
+			"error": err,
+		}).Fatal("Error creating mapstructure decoder.")
 	}
 	err = decoder.Decode(config)
 	if err != nil {
-		return err
+		b.Log.WithFields(logrus.Fields{
+			"error": err,
+		}).Fatal("Error decoding plugin configuration.")
 	}
 	for _, key := range required {
 		if !contains(metadata.Keys, key) {
-			return fmt.Errorf("Configuration missing required key %s", key)
+			b.Log.WithFields(logrus.Fields{
+				"key": key,
+			}).Fatal("Plugin configuration missing required key.")
 		}
 	}
-	return nil
 }
