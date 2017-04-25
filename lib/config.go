@@ -108,6 +108,7 @@ func (b *Bot) configure(filename string) error {
 	if config.StateFile == "" {
 		config.StateFile = "state.gob"
 	}
+	b.Log.Info("State file: ", config.StateFile)
 	b.stateDelay = config.SaveDelay
 	b.stateFile = config.StateFile
 	err = b.initLoadState(config.StateFile)
