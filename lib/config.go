@@ -2,6 +2,7 @@ package lib
 
 import "fmt"
 import "io/ioutil"
+import "mapstructure"
 import "os"
 import "gopkg.in/yaml.v2"
 
@@ -30,7 +31,8 @@ type botConfig struct {
 
 /*
 This loads a configuration file, sets any configuration values in the Bot, and
-then initializes all plugins.
+then initializes all plugins. To clarify, this configure() function is private
+and it is for configuring the whole bot and loading the plugins.
 */
 func (b *Bot) configure(filename string) error {
 	var config botConfig
@@ -59,6 +61,44 @@ func (b *Bot) configure(filename string) error {
 			return fmt.Errorf("error loading plugin %s", entry.Name)
 		}
 		b.plugins[entry.Name] = plugin
+	}
+	return nil
+}
+
+func contains(list []string, value string) bool {
+	for item := range list {
+		if item == value {
+			return true
+		}
+	}
+	return false
+}
+
+/*
+Loads a plugin configuration into destination struct. Raise an error if the
+configuration object did not contain a top-level key listed in "required". Also
+raise an error if the configuration object contained any keys which were not
+successfully loaded into the struct, since this is probably not intended.
+*/
+func Configure(config PluginConfig, dest interface{}, required []string) error {
+	var metadata mapstructure.Metadata
+	decoderConfig := &mapstructure.DecoderConfig{
+		ErrorUnused: True,
+		Metadata:    &metadata,
+		Result:      destination,
+	}
+	decoder, err := mapstructure.NewDecoder(decoderConfig)
+	if err != nil {
+		return err
+	}
+	err = decoder.Decode(config)
+	if err != nil {
+		return err
+	}
+	for _, key := range required {
+		if !contains(metadata.Keys, key) {
+			return fmt.Errorf("Configuration missing required key %s", key)
+		}
 	}
 	return nil
 }
