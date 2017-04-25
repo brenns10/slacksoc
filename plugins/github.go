@@ -10,6 +10,7 @@ github.com/ajm188/slack
 
 import (
 	"context"
+	"os"
 	"strings"
 	"time"
 
@@ -32,9 +33,27 @@ type ghPlugin struct {
 	client       *github.Client
 }
 
+func (g *ghPlugin) secretsMissing() bool {
+	return g.ClientID == "" || g.ClientSecret == "" || g.AccessToken == ""
+}
+
+func (g *ghPlugin) fromEnvVar() {
+	g.ClientID = os.Getenv("GITHUB_CLIENT_ID")
+	g.ClientSecret = os.Getenv("GITHUB_CLIENT_SECRET")
+	g.AccessToken = os.Getenv("GITHUB_ACCESS_TOKEN")
+}
+
 func newGitHub(bot *lib.Bot, _ string, cfg lib.PluginConfig) lib.Plugin {
 	g := ghPlugin{}
-	bot.Configure(cfg, &g, []string{"ClientID", "ClientSecret", "AccessToken"})
+	bot.Configure(cfg, &g, nil)
+	if g.secretsMissing() {
+		g.fromEnvVar()
+		if g.secretsMissing() {
+			bot.Log.Fatal("GitHub plugin missing required secrets. Either " +
+				"fill out the configuration file or set the environment " +
+				"variables.")
+		}
+	}
 	g.client = g.createClient()
 	bot.OnCommand("issue", g.Issue)
 	return &g

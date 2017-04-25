@@ -1,6 +1,7 @@
 package plugins
 
 import "fmt"
+import "os"
 import "strings"
 
 import "github.com/brenns10/slacksoc/lib"
@@ -94,7 +95,13 @@ func (l *lov) Help() string {
 
 func newLove(bot *lib.Bot, _ string, cfg lib.PluginConfig) lib.Plugin {
 	d := &lov{}
-	bot.Configure(cfg, &d.client, []string{"ApiKey", "BaseUrl"})
+	bot.Configure(cfg, &d.client, []string{"BaseUrl"})
+	if d.client.ApiKey == "" {
+		d.client.ApiKey = os.Getenv("LOVE_API_KEY")
+		if d.client.ApiKey == "" {
+			bot.Log.Fatal("Love client missing API key.")
+		}
+	}
 	bot.OnCommand("love", d.Love)
 	return d
 }
