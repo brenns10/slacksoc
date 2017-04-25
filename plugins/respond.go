@@ -4,7 +4,6 @@ import "math/rand"
 import "regexp"
 
 import "github.com/brenns10/slacksoc/lib"
-import "github.com/mitchellh/mapstructure"
 import "github.com/nlopes/slack"
 import "github.com/sirupsen/logrus"
 
@@ -32,10 +31,7 @@ manually registering it. Instead, use Register function for the core plugin lib.
 */
 func newRespond(bot *lib.Bot, name string, config lib.PluginConfig) lib.Plugin {
 	var respond respond
-	err := mapstructure.Decode(config, &respond)
-	if err != nil {
-		return nil
-	}
+	bot.Configure(config, &respond, []string{"Responses"})
 	for i, resp := range respond.Responses {
 		respond.Responses[i].trigger = regexp.MustCompile(resp.Trigger)
 		respond.Responses[i].trigger.Longest() // leftmost longest match
