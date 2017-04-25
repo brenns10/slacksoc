@@ -139,7 +139,11 @@ func (b *Bot) configure(filename string) error {
 	return nil
 }
 
-func contains(list []string, value string) bool {
+/*
+Return true if a slice of strings contains a string. This ends up being such a
+handy method that plugins will want to use it.
+*/
+func Contains(list []string, value string) bool {
 	for _, item := range list {
 		if item == value {
 			return true
@@ -176,7 +180,7 @@ func (b *Bot) Configure(config PluginConfig, dest interface{}, required []string
 		}).Fatal("Error decoding plugin configuration.")
 	}
 	for _, key := range required {
-		if !contains(metadata.Keys, key) {
+		if !Contains(metadata.Keys, key) {
 			b.Log.WithFields(logrus.Fields{
 				"key": key,
 			}).Fatal("Plugin configuration missing required key.")

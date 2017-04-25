@@ -40,9 +40,13 @@ configuration:
 Debug Plugin
 
 Debug is a plugin which adds several "commands" for viewing internal state of
-the bot and testing some capabilities. No configuration is required (beyond the
-name of the plugin). Use `slacksoc help Debug` for more information on its
-"functionality".
+the bot and testing some capabilities. Use `slacksoc help Debug` for more
+information on its "functionality". The only required configuration is a list of
+usernames that should be trusted to use the debug commands.
+
+  - name: Debug
+    trusted:
+      - brenns10
 
 Love Plugin
 

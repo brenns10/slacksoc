@@ -6,12 +6,38 @@ import "strconv"
 import "github.com/brenns10/slacksoc/lib"
 import "github.com/nlopes/slack"
 
-/*
-This is just for the plugin, we don't actually have any state.
-*/
-type debug struct {
-	name  string
+type debugConfig struct {
+	Trusted []string
+}
+
+type debugState struct {
 	State int64
+}
+
+type debug struct {
+	name   string
+	Config debugConfig
+	State  debugState
+}
+
+func (d *debug) trustedCommand(ch lib.CommandHandler) lib.CommandHandler {
+	return func(bot *lib.Bot, event *slack.MessageEvent, args []string) error {
+		if lib.Contains(d.Config.Trusted, bot.GetUserByID(event.User).Name) {
+			return ch(bot, event, args)
+		}
+		bot.React(event, "no_entry_sign")
+		return nil
+	}
+}
+
+func (d *debug) trustedHandler(mh lib.MessageHandler) lib.MessageHandler {
+	return func(bot *lib.Bot, event *slack.MessageEvent) error {
+		if lib.Contains(d.Config.Trusted, bot.GetUserByID(event.User).Name) {
+			return mh(bot, event)
+		}
+		bot.React(event, "no_entry_sign")
+		return nil
+	}
 }
 
 func (d *debug) Users(bot *lib.Bot, event *slack.MessageEvent) error {
@@ -67,8 +93,8 @@ func (d *debug) StateCmd(bot *lib.Bot, evt *slack.MessageEvent, args []string) e
 		if err != nil {
 			bot.Reply(evt, "Couldn't parse that number.")
 		} else {
-			d.State = n
-			bot.UpdateState(d.name, d)
+			d.State.State = n
+			bot.UpdateState(d.name, d.State)
 			bot.Reply(evt, "State has been updated.")
 		}
 	}
@@ -81,26 +107,26 @@ func (d *debug) Describe() string {
 
 func (d *debug) Help() string {
 	return "The Debug plugin contains several commands for debugging the bot.\n" +
-		"*users:* reply with list of users\n" +
-		"*channels:* log a list of users\n" +
-		"*metadata:* log the team and user data\n" +
-		"*debug:* reacts to the message with :dope:\n" +
-		"*info:* tells you what channel you're in, etc\n" +
-		"*id _target_*: return Slack ID of something"
+		"*slacksoc users:* reply with list of users\n" +
+		"*slacksoc channels:* log a list of users\n" +
+		"*slacksoc metadata:* log the team and user data\n" +
+		"*slacksoc info:* tells you what channel you're in, etc\n" +
+		"*slacksoc id _target_*: return Slack ID of something\n" +
+		"*slacksoc state _[number]_*: set or get a persisted state number"
 }
 
 /*
 Create a new debug plugin.
 */
-func newDebug(bot *lib.Bot, name string, _ lib.PluginConfig) lib.Plugin {
+func newDebug(bot *lib.Bot, name string, cfg lib.PluginConfig) lib.Plugin {
 	d := &debug{}
 	d.name = name
-	bot.GetState(name, d)
-	bot.OnMatch("^users$", d.Users)
-	bot.OnMatch("^channels$", d.Channels)
-	bot.OnMatch("^metadata$", d.Metadata)
-	bot.OnMatch("debug", lib.React("dope"))
-	bot.OnMatch("^info$", d.Info)
+	bot.Configure(cfg, &d.Config, []string{"Trusted"})
+	bot.GetState(name, &d.State)
+	bot.OnAddressedMatch("^users$", d.trustedHandler(d.Users))
+	bot.OnAddressedMatch("^channels$", d.trustedHandler(d.Channels))
+	bot.OnAddressedMatch("^metadata$", d.trustedHandler(d.Metadata))
+	bot.OnAddressedMatch("^info$", d.trustedHandler(d.Info))
 	bot.OnCommand("id", d.Id)
 	bot.OnCommand("state", d.StateCmd)
 	return d
