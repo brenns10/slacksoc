@@ -246,7 +246,7 @@ func (bot *Bot) runForever() {
 			break
 		case state := <-bot.stateChan:
 			if state.Type == "save" {
-				bot.Log.Info("Saving state...")
+				bot.Log.Info("Saving state to ", bot.stateFile)
 				bot.saveState()
 			} else if state.Type == "update" {
 				bot.Log.WithFields(logrus.Fields{
@@ -255,12 +255,12 @@ func (bot *Bot) runForever() {
 				bot.state[state.Plugin] = state.State
 				if !bot.stateDirty {
 					// only queue a new save when the state /becomes/ dirty
+					bot.stateDirty = true
 					go func() {
 						time.Sleep(time.Duration(bot.stateDelay) * time.Second)
 						bot.stateChan <- pluginStateEvent{Type: "save"}
 					}()
 				}
-				bot.stateDirty = true
 			} else {
 				bot.Log.WithFields(logrus.Fields{
 					"type": state.Type,
