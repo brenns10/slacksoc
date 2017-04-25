@@ -1,0 +1,17 @@
+plugins:
+  - name: Respond
+    responses:
+      - trigger: "(yo|hey|hi|hello|sup),? slacksoc"
+        replies: ["hello", "wassup", "yo"]
+      - trigger: "((good)?bye|adios),? slacksoc"
+        replies: ["goodbye"]
+      - trigger: "how much better is slack than groupme?"
+        replies: ["infinity"]
+      - trigger: ".*slack.*"
+        reacts: ["dope"]
+  - name: Debug
+  - name: Love
+    baseUrl: https://cwrulove.appspot.com/api
+  - name: GitHub
+  - name: RealName
+    channel: slackers
