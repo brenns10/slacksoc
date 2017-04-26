@@ -87,7 +87,7 @@ func (d *debug) Id(bot *lib.Bot, evt *slack.MessageEvent, args []string) error {
 
 func (d *debug) StateCmd(bot *lib.Bot, evt *slack.MessageEvent, args []string) error {
 	if len(args) <= 1 {
-		bot.Reply(evt, fmt.Sprintf("state is %d", d.State))
+		bot.Reply(evt, fmt.Sprintf("state is %d", d.State.State))
 	} else {
 		n, err := strconv.ParseInt(args[1], 10, 64)
 		if err != nil {
