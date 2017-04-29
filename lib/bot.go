@@ -141,7 +141,7 @@ func (bot *Bot) OnAddressed(mh MessageHandler) {
 		// Could optimize this by placing the compiled regex into a struct field
 		// which is initialized by the hello message handler.
 		re := regexp.MustCompile(fmt.Sprintf(
-			`\s*(<@%s(\|\w+)?>|@?%s):?\s+`, bot.User.ID, bot.User.Name,
+			`\s*(<@%s(\|\w+)?>|@?%s)(?:,|:)?\s+`, bot.User.ID, bot.User.Name,
 		))
 		match := re.FindAllStringIndex(evt.Msg.Text, 1)
 		if match != nil && match[0][0] == 0 {
