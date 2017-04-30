@@ -38,10 +38,12 @@ func newHotPotato(bot *lib.Bot, _ string, cfg lib.PluginConfig) lib.Plugin {
 	p := hotPotato{}
 
 	bot.Configure(cfg, &p, []string{"Timeout", "DiversityThreshold"})
-	p.passRegexp = regexp.MustCompile(`(?i)pass the potato to <@(U\w+)(\|\w+)?>`)
+	p.passRegexp = regexp.MustCompile(`(?i)pass the (?:hot )?potato to <@(U\w+)(\|\w+)?>`)
 
 	bot.OnAddressedMatchExpr(p.passRegexp, p.locked(p.Pass))
 	bot.OnAddressedMatch(`(?i)^give me the potato[!.]?$`, p.locked(p.Give))
+	bot.OnAddressedMatch(`(?i)^who has the (?:hot )?potato[?.!]?`,
+		p.locked(p.Who))
 
 	return &p
 }
@@ -160,7 +162,7 @@ func (p *hotPotato) Pass(bot *lib.Bot, evt *slack.MessageEvent) error {
 	p.history = append(p.history, newEntry)
 
 	// notify the new person that they have the potato
-	bot.DirectMessage(target, "You have the potato :sweet_potato:! You "+
+	bot.DirectMessage(target, "You have the hot potato :sweet_potato:! You "+
 		"can pass it by saying 'pass the potato to @username'")
 	// notify the sender that they have sent the potato
 	bot.DirectMessage(evt.User, "It is gone :sweet_potato:")
@@ -189,10 +191,33 @@ func (p *hotPotato) Give(bot *lib.Bot, evt *slack.MessageEvent) error {
 	p.history = append(p.history, newEntry)
 	p.unique = 1
 	bot.Reply(evt,
-		fmt.Sprintf("%s now has the potato :sweet_potato:. Let the game begin!",
+		fmt.Sprintf("%s now has the hot potato :sweet_potato:. Let the game begin!",
 			bot.Mention(bot.GetUserByID(evt.User))))
-	bot.DirectMessage(evt.User, "Say 'pass the potato to @username' to pass!"+
-		":sweet_potato:")
+	bot.DirectMessage(evt.User, "You have the hot potato :sweet_potato:! "+
+		"Say 'pass the potato to @username' to pass!")
+
+	return nil
+}
+
+/*
+Handles the "who has the potato" question. Assumes that we hold the lock.
+*/
+func (p *hotPotato) Who(bot *lib.Bot, evt *slack.MessageEvent) error {
+	if len(p.history) == 0 {
+		bot.Reply(evt, "There's no game happening right now.")
+		return nil
+	}
+
+	lastIdx := len(p.history) - 1
+	lastEntry := p.history[lastIdx]
+	user := bot.GetUserByID(lastEntry.Uid)
+	deadline := lastEntry.Received.Add(time.Duration(p.Timeout) * time.Minute)
+	bot.Reply(evt, fmt.Sprintf(
+		"%s got the hot potato at %s. They have until %s to pass it. "+
+			"The potato has been passed %d times.",
+		bot.Mention(user), lastEntry.Received.Format("3:05 PM"),
+		deadline.Format("3:05 PM"), len(p.history),
+	))
 
 	return nil
 }
