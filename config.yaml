@@ -18,4 +18,4 @@ plugins:
     channel: slackers
   - name: HotPotato
     timeout: 180
-    diversityThreshold: 2.0
+    diversityThreshold: 2.5
