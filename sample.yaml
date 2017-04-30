@@ -72,3 +72,21 @@ plugins:
     # environment variables instead (e.g. GITHUB_ACCESS_TOKEN)
   - name: RealName
     channel: general
+  - name: HotPotato
+    # The timeout specifies how many MINUTES until a person loses the game for
+    # not passing the potato
+    timeout: 180
+    # The diversity threshold is an upper limit on the following quantity:
+    #
+    # diversity = (# of "possessions") / (# unique people)
+    #
+    # Say that the potato went A -> B -> C -> B -> D -> A -> E. There are a
+    # total of 7 "possessions" of the potato, and 5 unique people. So the
+    # diversity is 7/5 = 1.4.
+    #
+    # The game will not allow a potato pass that would make the diversity
+    # strictly greater than the threshold. The effect of this is to force the
+    # game to be played among new people, rather than cycling through the same
+    # clique of people. Hopefully, this encourages the game to be inclusive and
+    # fun!
+    diversityThreshold: 2.5

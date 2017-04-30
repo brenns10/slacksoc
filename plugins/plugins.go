@@ -111,6 +111,37 @@ it will still work.
   - name: RealName
     channel: general
 
+HotPotato Plugin
+
+HotPotato is somewhat similar in spirit to Facebook Pokes, but as a fun little
+game. A user can ask for the hot potato in a public channel. When a user gets
+the potato, they get a DM from slacksoc. They can instruct slacksoc to pass it
+to another user. If they don't pass it within a certain timeout, they will lose,
+and a new game may be started. There is only one potato per Slack team.
+
+The game encourages inclusion by artificially limiting the number of times the
+potato can be passed among a small group of players. See the config fragment
+for an explanation of the mechanism.
+
+  - name: HotPotato
+    # The timeout specifies how many MINUTES until a person loses the game for
+    # not passing the potato
+    timeout: 180
+    # The diversity threshold is an upper limit on the following quantity:
+    #
+    # diversity = (# of "possessions") / (# unique people)
+    #
+    # Say that the potato went A -> B -> C -> B -> D -> A -> E. There are a
+    # total of 7 "possessions" of the potato, and 5 unique people. So the
+    # diversity is 7/5 = 1.4.
+    #
+    # The game will not allow a potato pass that would make the diversity
+    # strictly greater than the threshold. The effect of this is to force the
+    # game to be played among new people, rather than cycling through the same
+    # clique of people. Hopefully, this encourages the game to be inclusive and
+    # fun!
+    diversityThreshold: 2.5
+
 Plugin Library Design
 
 This plugin library demonstrates what I believe to be the best way to publish
@@ -133,4 +164,5 @@ func Register() {
 	lib.Register("Love", newLove)
 	lib.Register("GitHub", newGitHub)
 	lib.Register("RealName", newRealName)
+	lib.Register("HotPotato", newHotPotato)
 }
