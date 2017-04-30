@@ -133,4 +133,5 @@ func Register() {
 	lib.Register("Love", newLove)
 	lib.Register("GitHub", newGitHub)
 	lib.Register("RealName", newRealName)
+	lib.Register("HotPotato", newHotPotato)
 }
