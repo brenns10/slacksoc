@@ -17,5 +17,5 @@ plugins:
   - name: RealName
     channel: slackers
   - name: HotPotato
-    timeout: 1
+    timeout: 180
     diversityThreshold: 2.0
