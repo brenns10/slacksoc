@@ -162,10 +162,16 @@ func (p *hotPotato) Pass(bot *lib.Bot, evt *slack.MessageEvent) error {
 	p.history = append(p.history, newEntry)
 
 	// notify the new person that they have the potato
-	bot.DirectMessage(target, "You have the hot potato :sweet_potato:! You "+
-		"can pass it by saying 'pass the potato to @username'")
+	bot.DirectMessage(target, fmt.Sprintf(
+		"%s passed you the hot potato :sweet_potato:! You "+
+			"can pass it by saying 'pass the potato to @username'",
+		bot.Mention(bot.GetUserByID(evt.User)),
+	))
 	// notify the sender that they have sent the potato
-	bot.DirectMessage(evt.User, "It is gone :sweet_potato:")
+	bot.DirectMessage(evt.User, fmt.Sprintf(
+		"Passed the potato to %s :sweet_potato:",
+		bot.Mention(bot.GetUserByID(target)),
+	))
 
 	return nil
 }
