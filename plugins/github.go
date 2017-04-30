@@ -86,7 +86,7 @@ func (p *ghPlugin) Describe() string {
 
 func (p *ghPlugin) Help() string {
 	return "usage:\n" +
-		"**issue me** _owner/repo title [body [assignee]]_ - create a " +
+		"*issue me* _owner/repo title [body [assignee]]_ - create a " +
 		"GitHub issue\n"
 }
 
