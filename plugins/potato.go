@@ -221,8 +221,8 @@ func (p *hotPotato) Who(bot *lib.Bot, evt *slack.MessageEvent) error {
 	bot.Reply(evt, fmt.Sprintf(
 		"%s got the hot potato at %s. They have until %s to pass it. "+
 			"The potato has been passed %d times.",
-		bot.Mention(user), lastEntry.Received.Format("3:05 PM"),
-		deadline.Format("3:05 PM"), len(p.history),
+		bot.Mention(user), lastEntry.Received.Format("3:04 PM"),
+		deadline.Format("3:04 PM"), len(p.history),
 	))
 
 	return nil
