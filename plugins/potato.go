@@ -58,12 +58,12 @@ func (p *hotPotato) Help() string {
 		"before your timer runs out. If your timer runs out, you lose, and " +
 		"you'll be publicly shamed in #random.\n" +
 		"usage (in public channels):\n" +
-		"**slacksoc give me the potato** - starts a game if there's not one " +
+		"*slacksoc give me the potato* - starts a game if there's not one " +
 		"happening\n" +
-		"**slacksoc who has the potato** - tells you who has the potato, and " +
+		"*slacksoc who has the potato* - tells you who has the potato, and " +
 		"how long they have left until they need to pass it\n" +
 		"usage (in DMs):\n" +
-		"**pass the potato to** _@username_ - passes to _@username_ if you " +
+		"*pass the potato to* _@username_ - passes to _@username_ if you " +
 		"have the potato. They'll know who passed it to them"
 }
 
