@@ -112,8 +112,8 @@ func (p *ghPlugin) Issue(bot *lib.Bot, evt *slack.MessageEvent, args []string) e
 		}
 
 		// get necessary arguments
-		var title, assignee *string
-		var body string
+		var assignee *string
+		var title, body string
 		ownerRepo := strings.Split(args[0], "/")
 		if len(ownerRepo) != 2 {
 			bot.Reply(evt, "error: first argument should be owner/repo")
@@ -126,7 +126,7 @@ func (p *ghPlugin) Issue(bot *lib.Bot, evt *slack.MessageEvent, args []string) e
 		if user.RealName != "" {
 			name += " (" + user.RealName + ")"
 		}
-		title = &args[1]
+		title = args[1]
 		if len(args) >= 3 {
 			body = args[2]
 			body += "\n\nCreated via Slack on behalf of " + name
@@ -140,7 +140,7 @@ func (p *ghPlugin) Issue(bot *lib.Bot, evt *slack.MessageEvent, args []string) e
 
 		// and send the request
 		request := github.IssueRequest{
-			Title:     title,
+			Title:     &title,
 			Body:      &body,
 			Labels:    nil,
 			Assignee:  assignee,
@@ -149,9 +149,11 @@ func (p *ghPlugin) Issue(bot *lib.Bot, evt *slack.MessageEvent, args []string) e
 		}
 		issue, _, err := p.client.Issues.Create(context.TODO(), owner, repo, &request)
 		logEntry := bot.Log.WithFields(logrus.Fields{
-			"title": *title, "body": body, "assignee": *assignee, "owner": owner,
-			"repos": repo,
+			"title": title, "body": body, "owner": owner, "repos": repo,
 		})
+		if assignee != nil {
+			logEntry.Data["assignee"] = *assignee
+		}
 		if err != nil {
 			bot.Reply(evt, "Error creating the issue: "+err.Error())
 			logEntry.Error("Error creating a GitHub issue.")
