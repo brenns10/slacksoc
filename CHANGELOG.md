@@ -19,6 +19,10 @@ manually.
 
 ## [Unreleased]
 
+## [1.1.1] - 2017-04-30
+
+- **Fixed:** segfault in GitHub plugin due to new logging code
+
 ## [1.1.0] - 2017-04-30
 
 - **Fixed:** Debug plugin's "state" command outputs as 0, not as {0}
