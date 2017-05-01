@@ -19,6 +19,11 @@ manually.
 
 ## [Unreleased]
 
+## [1.1.2] - 2017-04-30
+
+- **Fixed:** incorrect bold markup in HotPotato plugin
+- **Fixed:** incorrect time formatting in HotPotato plugin
+
 ## [1.1.1] - 2017-04-30
 
 - **Fixed:** segfault in GitHub plugin due to new logging code
