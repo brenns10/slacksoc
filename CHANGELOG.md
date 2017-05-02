@@ -19,6 +19,12 @@ manually.
 
 ## [Unreleased]
 
+## [1.2.0] - 2017-05-02
+
+- **Added:** HotPotato games persist across reboots
+- **Changed:** Potato passes are announced in #random
+- **Added:** HotPotato `slacksoc potato history` command
+
 ## [1.1.2] - 2017-04-30
 
 - **Fixed:** incorrect bold markup in HotPotato plugin

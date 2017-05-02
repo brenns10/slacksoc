@@ -134,7 +134,7 @@ func newDebug(bot *lib.Bot, name string, cfg lib.PluginConfig) lib.Plugin {
 	bot.OnAddressedMatch("^channels$", d.trustedHandler(d.Channels))
 	bot.OnAddressedMatch("^metadata$", d.trustedHandler(d.Metadata))
 	bot.OnAddressedMatch("^info$", d.trustedHandler(d.Info))
-	bot.OnAddressedMatch("^version$", lib.Reply("My version is 1.1.2"))
+	bot.OnAddressedMatch("^version$", lib.Reply("My version is 1.2.0"))
 	bot.OnCommand("id", d.Id)
 	bot.OnCommand("state", d.StateCmd)
 	bot.OnAddressedMatch("^pm me$", d.PM)
