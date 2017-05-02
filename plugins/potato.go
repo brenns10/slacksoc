@@ -6,6 +6,7 @@ to each other.
 */
 
 import (
+	"bytes"
 	"fmt"
 	"regexp"
 	"sync"
@@ -51,8 +52,10 @@ func newHotPotato(bot *lib.Bot, name string, cfg lib.PluginConfig) lib.Plugin {
 
 	bot.OnAddressedMatchExpr(p.passRegexp, p.locked(p.Pass))
 	bot.OnAddressedMatch(`(?i)^give me the potato[!.]?$`, p.locked(p.Give))
-	bot.OnAddressedMatch(`(?i)^who has the (?:hot )?potato[?.!]?`,
+	bot.OnAddressedMatch(`(?i)^who has the (?:hot )?potato[?.!]?$`,
 		p.locked(p.Who))
+	bot.OnAddressedMatch(`(?i)^potato history$`,
+		p.locked(p.Had))
 	bot.OnEvent("hello", p.Hello)
 
 	return &p
@@ -180,7 +183,7 @@ func (p *hotPotato) Pass(bot *lib.Bot, evt *slack.MessageEvent) error {
 		return nil
 	}
 	target := p.passRegexp.FindStringSubmatch(evt.Text)[1]
-	if target == evt.User || target == "USLACKBOT" || target == bot.User.ID {
+	if /*target == evt.User ||*/ target == "USLACKBOT" || target == bot.User.ID {
 		bot.Reply(evt, "You can't pass the potato to them.")
 		return nil
 	}
@@ -283,5 +286,23 @@ func (p *hotPotato) Who(bot *lib.Bot, evt *slack.MessageEvent) error {
 		deadline.Format("3:04 PM"), len(p.game.History),
 	))
 
+	return nil
+}
+
+/*
+Handles "potato history". Assumes we hold the lock.
+*/
+func (p *hotPotato) Had(bot *lib.Bot, evt *slack.MessageEvent) error {
+	if len(p.game.History) == 0 {
+		bot.Reply(evt, "There's no game happening right now.")
+		return nil
+	}
+	var buffer bytes.Buffer
+	buffer.WriteString(bot.User.Name)
+	for _, entry := range p.game.History {
+		buffer.WriteString(" - ")
+		buffer.WriteString(bot.GetUserByID(entry.Uid).Name)
+	}
+	bot.Reply(evt, buffer.String())
 	return nil
 }
