@@ -105,6 +105,7 @@ func (bot *Bot) UpdateState(plugin string, state interface{}) {
 	if err != nil {
 		bot.Log.WithFields(logrus.Fields{
 			"plugin": plugin,
+			"error":  err,
 		}).Error("Failed to UpdateState for plugin. Continuing.")
 		return
 	}
