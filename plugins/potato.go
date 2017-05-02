@@ -218,6 +218,11 @@ func (p *hotPotato) Pass(bot *lib.Bot, evt *slack.MessageEvent) error {
 		"Passed the potato to %s :sweet_potato:",
 		bot.Mention(bot.GetUserByID(target)),
 	))
+	// and send a message to #random about it
+	bot.Send(bot.GetChannelByName("random"), fmt.Sprintf(
+		"%s passed the potato to %s :sweet_potato:",
+		bot.Mention(bot.GetUserByID(evt.User)),
+		bot.Mention(bot.GetUserByID(target))))
 
 	return nil
 }
