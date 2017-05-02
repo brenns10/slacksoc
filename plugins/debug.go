@@ -118,7 +118,8 @@ func (d *debug) Help() string {
 		"*slacksoc info:* tells you what channel you're in, etc\n" +
 		"*slacksoc id _target_*: return Slack ID of something\n" +
 		"*slacksoc state _[number]_*: set or get a persisted state number\n" +
-		"*slacksoc pm me*: request a PM"
+		"*slacksoc pm me*: request a PM\n" +
+		"*slacksoc version*: tells the slacksoc version"
 }
 
 /*
@@ -133,6 +134,7 @@ func newDebug(bot *lib.Bot, name string, cfg lib.PluginConfig) lib.Plugin {
 	bot.OnAddressedMatch("^channels$", d.trustedHandler(d.Channels))
 	bot.OnAddressedMatch("^metadata$", d.trustedHandler(d.Metadata))
 	bot.OnAddressedMatch("^info$", d.trustedHandler(d.Info))
+	bot.OnAddressedMatch("^version$", lib.Reply("My version is 1.1.2"))
 	bot.OnCommand("id", d.Id)
 	bot.OnCommand("state", d.StateCmd)
 	bot.OnAddressedMatch("^pm me$", d.PM)
