@@ -14,7 +14,15 @@
 # You can provide this token in the configuration file, or via the SLACK_TOKEN
 # environment variable.
 token: SLACK TOKEN
+
+# This is where plugins will store their state. It's optional - leaving it unset
+# will select state.gob instead.
+stateFile: state.gob
+
+# And here we specify the plugins we would like to load. Only plugins in this
+# list will be loaded.
 plugins:
+
   - name: Respond
     # This is a list of objects that define a response. (As of now) only one
     # response can ever fire at a time--the first match.
