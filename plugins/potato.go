@@ -106,6 +106,8 @@ func (p *hotPotato) Help() string {
 		"happening\n" +
 		"*slacksoc who has the potato* - tells you who has the potato, and " +
 		"how long they have left until they need to pass it\n" +
+		"*slacksoc potato history* - tells you who has had the potato over " +
+		"the course of the current game\n" +
 		"usage (in DMs):\n" +
 		"*pass the potato to* _@username_ - passes to _@username_ if you " +
 		"have the potato. They'll know who passed it to them"
