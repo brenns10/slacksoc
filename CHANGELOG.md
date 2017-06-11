@@ -19,6 +19,14 @@ manually.
 
 ## [Unreleased]
 
+- **Fixed:** incorrect @mention format, which caused some clients to show `@...`
+  in the place of mentions ([#35][i35])
+- **Fixed:** command `slacksoc potato history` now included in help text
+  ([#34][i34]).
+  
+[i35]: https://github.com/brenns10/slacksoc/issues/35
+[i34]: https://github.com/brenns10/slacksoc/issues/34
+
 ## [1.2.0] - 2017-05-02
 
 - **Added:** HotPotato games persist across reboots
