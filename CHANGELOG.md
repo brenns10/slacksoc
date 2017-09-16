@@ -11,13 +11,18 @@ Versions are updated as follows:
   a change.
 - Patch version incremented for bugfixes, or changes which shouldn't impact old
   deployments or plugins.
-  
+
 Since this project is in Go, "release" is an arbitrary term, but it refers to a
 git tag. When you `go get` this package, you get the master branch, but you are
 welcome to pin particular git tags within your `vendor/` directory and update
 manually.
 
+**NB:** When releasing a new version, be sure to update `plugins/debug.go` so
+that the bot can report its version properly.
+
 ## [Unreleased]
+
+## [1.2.2] - 2017-09-16
 
 - **Fixed:** HotPotato: can no longer pass to yourself
 
