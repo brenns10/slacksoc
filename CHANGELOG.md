@@ -19,6 +19,8 @@ manually.
 
 ## [Unreleased]
 
+## [1.2.1] - 2017-09-16
+
 - **Fixed:** incorrect @mention syntax, two different times ([i35][], [i37][])
 - **Fixed:** command `slacksoc potato history` now included in help text
   ([#34][i34]).
