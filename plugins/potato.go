@@ -185,7 +185,7 @@ func (p *hotPotato) Pass(bot *lib.Bot, evt *slack.MessageEvent) error {
 		return nil
 	}
 	target := p.passRegexp.FindStringSubmatch(evt.Text)[1]
-	if /*target == evt.User ||*/ target == "USLACKBOT" || target == bot.User.ID {
+	if target == evt.User || target == "USLACKBOT" || target == bot.User.ID {
 		bot.Reply(evt, "You can't pass the potato to them.")
 		return nil
 	}

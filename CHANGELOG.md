@@ -19,6 +19,8 @@ manually.
 
 ## [Unreleased]
 
+- **Fixed:** HotPotato: can no longer pass to yourself
+
 ## [1.2.1] - 2017-09-16
 
 - **Fixed:** incorrect @mention syntax, two different times ([i35][], [i37][])
