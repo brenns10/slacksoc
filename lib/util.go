@@ -58,7 +58,7 @@ func (bot *Bot) React(evt *slack.MessageEvent, reaction string) {
 Construct a string to @mention a user.
 */
 func (bot *Bot) Mention(user *slack.User) string {
-	return fmt.Sprintf("<@%s|%s>", user.ID, user.Name)
+	return fmt.Sprintf("<@%s>", user.ID)
 }
 
 /*
