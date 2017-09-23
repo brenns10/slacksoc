@@ -33,8 +33,8 @@ func (bot *Bot) DirectMessage(uid string, msg string) {
 		_, _, channel, err := bot.API.OpenIMChannel(uid)
 		if err != nil {
 			bot.Log.WithFields(logrus.Fields{
-				"uid": uid,
-				"msg": msg,
+				"uid":   uid,
+				"msg":   msg,
 				"error": err,
 			}).Error("Failed to send DM.")
 		}

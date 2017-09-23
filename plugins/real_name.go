@@ -5,7 +5,7 @@ import "fmt"
 import "github.com/brenns10/slacksoc/lib"
 import "github.com/nlopes/slack"
 
-type realName struct{
+type realName struct {
 	Channel string
 }
 

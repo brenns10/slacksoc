@@ -21,7 +21,7 @@ If all you would like to do is use the included plugins, usage is simple. First,
 install the `slacksoc` binary:
 
     go get github.com/brenns10/slacksoc/slacksoc
-    
+
 Create a YAML configuration file - see [sample.yaml](sample.yaml) for an
 example. Be sure that, at a minimum, the config contains your Slack API token,
 and an entry with appropriate configuration for each plugin you want to use.
@@ -59,3 +59,21 @@ found in the [Wiki](https://github.com/brenns10/slacksoc/wiki).
 
 - [GoDoc (lib)](https://godoc.org/github.com/brenns10/slacksoc/lib)
 - [GoDoc (plugins)](https://godoc.org/github.com/brenns10/slacksoc/plugins)
+
+### Contributing
+
+Contributions to this repository are welcomed! Changes ought to be tested on a
+real Slack team before being submitted. Plugin contributions will be accepted at
+my (Stephen's) sole discretion, since custom plugins are easy to use without
+being part of the core plugin set. See the Github issues for suggestions on
+bugs, features, and plugins I'm interested in.
+
+Please make sure that when you do development, you install the pre-commit hooks:
+
+```
+$ pip install --user pre-commit
+$ pre-commit install
+```
+
+This ensures well-formatted code. You need only do this the first time you check
+out the repository.
