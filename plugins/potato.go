@@ -215,7 +215,8 @@ func (p *hotPotato) Pass(bot *lib.Bot, evt *slack.MessageEvent) error {
 	// notify the new person that they have the potato
 	bot.DirectMessage(target, fmt.Sprintf(
 		"%s passed you the hot potato :sweet_potato:! You "+
-			"can pass it by saying 'pass the potato to @username'",
+			"can pass it by replying to this DM: 'pass the potato "+
+			"to @username'",
 		bot.Mention(bot.GetUserByID(evt.User)),
 	))
 	// notify the sender that they have sent the potato

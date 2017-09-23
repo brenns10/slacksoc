@@ -22,13 +22,19 @@ that the bot can report its version properly.
 
 ## [Unreleased]
 
+- **Changed:** Adjust wording of HotPotato prompt to reduce confusion about
+  where you must say 'pass the potato' ([#40][i40]).
+
+[i40]: https://github.com/brenns10/slacksoc/issues/40
+
 ## [1.2.2] - 2017-09-16
 
 - **Fixed:** HotPotato: can no longer pass to yourself
 
 ## [1.2.1] - 2017-09-16
 
-- **Fixed:** incorrect @mention syntax, two different times ([i35][], [i37][])
+- **Fixed:** incorrect @mention syntax, two different times ([#35][i35],
+  [#37][i37])
 - **Fixed:** command `slacksoc potato history` now included in help text
   ([#34][i34]).
 
